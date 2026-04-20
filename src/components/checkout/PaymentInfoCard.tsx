@@ -1,61 +1,68 @@
 /**
  * PaymentInfoCard
  * -----------------------------------------------------------------------------
- * Credit card fields (card number, expiration, CVV). All inputs are
- * uncontrolled — no validation, no submission side effects.
+ * Hosts the ConvesioPay checkout component (a PCI-compliant iframe widget that
+ * tokenizes card data on ConvesioPay's side). The SDK is initialized + mounted
+ * exactly once via the `useConvesioPayCheckout` hook; the public-safe API key
+ * and client key are fetched once from the `/config` worker endpoint and
+ * cached at module scope.
  *
  * Content source: `checkoutContent.payment`
  *
  * Markers:
- *   - root                  data-section="payment-info"
- *   - individual fields      data-field="card-number" | "expiry" | "cvv"
+ *   - root                        data-section="payment-info"
+ *   - mount container             data-slot="cpay-mount"
+ *   - loading placeholder         data-slot="cpay-loading"
+ *   - error message               data-slot="cpay-error"
  * -----------------------------------------------------------------------------
  */
 
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { useRef } from "react";
+
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
+import { useConvesioPayCheckout } from "@/hooks/useConvesioPayCheckout";
 import type { PaymentFormCopy } from "@/content/checkout";
 
 export interface PaymentInfoCardProps {
   copy: PaymentFormCopy;
+  customerEmail?: string;
 }
 
-export function PaymentInfoCard({ copy }: PaymentInfoCardProps) {
+export function PaymentInfoCard({ copy, customerEmail }: PaymentInfoCardProps) {
+  const mountRef = useRef<HTMLDivElement | null>(null);
+  const { status, error } = useConvesioPayCheckout(mountRef, {
+    customerEmail,
+    theme: "dark",
+  });
+
   return (
     <SectionCard section="payment-info" title={copy.title}>
-      <FieldGroup>
-        <Field data-field="card-number">
-          <FieldLabel htmlFor="card-number">{copy.cardNumberLabel}</FieldLabel>
-          <Input
-            id="card-number"
-            inputMode="numeric"
-            autoComplete="cc-number"
-            placeholder={copy.cardNumberPlaceholder}
-          />
-        </Field>
+      <div
+        ref={mountRef}
+        data-slot="cpay-mount"
+        id="cpay-checkout-component"
+        className="min-h-[220px]"
+      />
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field data-field="expiry">
-            <FieldLabel htmlFor="card-expiry">{copy.expiryLabel}</FieldLabel>
-            <Input
-              id="card-expiry"
-              inputMode="numeric"
-              autoComplete="cc-exp"
-              placeholder={copy.expiryPlaceholder}
-            />
-          </Field>
-          <Field data-field="cvv">
-            <FieldLabel htmlFor="card-cvv">{copy.cvvLabel}</FieldLabel>
-            <Input
-              id="card-cvv"
-              inputMode="numeric"
-              autoComplete="cc-csc"
-              placeholder={copy.cvvPlaceholder}
-            />
-          </Field>
-        </div>
-      </FieldGroup>
+      {status === "loading" && (
+        <p
+          data-slot="cpay-loading"
+          className="text-sm text-muted-foreground"
+          aria-live="polite"
+        >
+          Loading secure payment form…
+        </p>
+      )}
+
+      {status === "error" && (
+        <p
+          data-slot="cpay-error"
+          role="alert"
+          className="text-sm text-destructive"
+        >
+          {error?.message ?? "Could not load the payment form."}
+        </p>
+      )}
     </SectionCard>
   );
 }
