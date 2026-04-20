@@ -1,5 +1,7 @@
+import { CheckoutPage } from "@/pages/CheckoutPage";
+
 function App() {
-  return null
+  return <CheckoutPage />;
 }
 
-export default App
+export default App;
