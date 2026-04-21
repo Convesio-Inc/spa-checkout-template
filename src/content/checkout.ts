@@ -7,7 +7,6 @@
  * shape of each section.
  *
  * Structure:
- *   - PageCopy              Page heading + subtitle
  *   - BrandConfig           Brand identity: name + icon shown in the header/footer
  *   - ProductConfig         The item being sold: image, name, unit price
  *   - CustomerFormCopy      Customer Information card copy (email)
@@ -17,12 +16,6 @@
  *   - FooterCopy            Optional suffix appended after the copyright line
  * -----------------------------------------------------------------------------
  */
-
-export interface PageCopy {
-  title: string;
-  subtitle: string;
-}
-
 export interface ProductImage {
   src: string;
   alt: string;
@@ -126,7 +119,6 @@ export interface GuaranteeCopy {
 }
 
 export interface CheckoutContent {
-  page: PageCopy;
   brand: BrandConfig;
   product: ProductConfig;
   customer: CustomerFormCopy;
@@ -139,16 +131,11 @@ export interface CheckoutContent {
 }
 
 export const checkoutContent: CheckoutContent = {
-  page: {
-    title: "Checkout",
-    subtitle: "Simple dark mode checkout demo.",
-  },
-
   brand: {
-    name: "Convesio",
+    name: "BioVerve",
     icon: {
       src: "/store-logo.jpeg",
-      alt: "Convesio logo",
+      alt: "BioVerve logo",
     },
   },
 

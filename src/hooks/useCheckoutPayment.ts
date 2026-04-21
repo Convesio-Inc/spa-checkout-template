@@ -41,6 +41,11 @@ export interface Address {
   country: string;
 }
 
+export interface LineItem {
+  description: string;
+  quantity: number;
+  amountIncludingTax: number;
+}
 export interface PaymentPayload {
   email: string;
   name: string;
@@ -49,6 +54,7 @@ export interface PaymentPayload {
   phone?: { number: string; countryCode: string };
   billingAddress?: Address;
   shippingAddress?: Address;
+  lineItems?: LineItem[];
 }
 
 export interface PaymentResponse {

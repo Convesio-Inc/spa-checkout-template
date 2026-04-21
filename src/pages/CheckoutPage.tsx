@@ -118,6 +118,13 @@ export function CheckoutPage() {
       },
       billingAddress: address,
       shippingAddress: address,
+      lineItems: [
+        {
+          description: product.name,
+          quantity: 1,
+          amountIncludingTax: summary.amountMinor,
+        },
+      ]
     });
   };
 
