@@ -44,12 +44,10 @@ declare global {
   }
 
   interface ConvesioPayComponent {
-    /** Despite the docs calling this `domElement`, the SDK internally calls
-     *  `document.querySelector(...)` on whatever is passed in, so it must be
-     *  a CSS selector string (e.g. `"#cpay-checkout-component"`). */
     mount: (selector: string) => void;
     updateEmail: (email: string) => void;
     updateAmount: (amount: number, currency?: string) => void;
+    createToken: () => Promise<string>;
     on: <K extends keyof ConvesioPayComponentEventMap>(
       event: K,
       handler: (payload: ConvesioPayComponentEventMap[K]) => void,

@@ -4,7 +4,10 @@
  * Sidebar summarizing the order: product photo, product line, shipping, tax,
  * total, and the primary Pay Now CTA with a terms footnote.
  *
- * The Pay Now button is intentionally inert — it only logs a notice in dev.
+ * The Pay Now button is a plain `type="submit"` — the parent `<form>` in
+ * `CheckoutPage` owns the `onSubmit` handler that runs the payment flow. The
+ * button disables itself while the card widget is invalid (`payDisabled`) or
+ * while a payment is in-flight (`payLoading`).
  *
  * Content source: `checkoutContent.summary` + `checkoutContent.product`
  *
@@ -23,6 +26,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 import { PriceRow } from "@/components/checkout/primitives/PriceRow";
 import type { ProductConfig, SummaryConfig } from "@/content/checkout";
 
@@ -31,21 +35,17 @@ export interface OrderSummaryCardProps {
   product: ProductConfig;
   /** When true the Pay Now button is non-interactive. Defaults to false. */
   payDisabled?: boolean;
+  /** When true the button shows a spinner and stays disabled. */
+  payLoading?: boolean;
 }
 
 export function OrderSummaryCard({
   copy,
   product,
   payDisabled = false,
+  payLoading = false,
 }: OrderSummaryCardProps) {
-  const handlePayNow = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    if (import.meta.env.DEV) {
-      console.info(
-        "[checkout-template] Pay Now clicked — this template has no payment flow."
-      );
-    }
-  };
+  const disabled = payDisabled || payLoading;
 
   return (
     <aside
@@ -92,13 +92,13 @@ export function OrderSummaryCard({
 
       <Button
         data-slot="cta-primary"
-        type="button"
+        type="submit"
         size="lg"
-        onClick={handlePayNow}
-        disabled={payDisabled}
-        aria-disabled={payDisabled}
+        disabled={disabled}
+        aria-disabled={disabled}
         className="mt-1 h-12 w-full rounded-lg bg-brand text-base font-semibold text-brand-foreground hover:bg-brand-accent"
       >
+        {payLoading && <Spinner data-icon="inline-start" />}
         {copy.ctaLabel}
       </Button>
 

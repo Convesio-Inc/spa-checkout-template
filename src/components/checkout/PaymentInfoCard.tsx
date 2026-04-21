@@ -28,22 +28,33 @@ export interface PaymentInfoCardProps {
   customerEmail?: string;
   /** Fires whenever the ConvesioPay component reports a validity change. */
   onValidityChange?: (isValid: boolean) => void;
+  /** Fires once the ConvesioPay SDK component has mounted. Gives the parent a
+   *  handle to call `component.createToken()` at submit time. */
+  onComponentReady?: (component: ConvesioPayComponent) => void;
 }
 
 export function PaymentInfoCard({
   copy,
   customerEmail,
   onValidityChange,
+  onComponentReady,
 }: PaymentInfoCardProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
-  const { status, error, isValid } = useConvesioPayCheckout(mountRef, {
-    customerEmail,
-    theme: "dark",
-  });
+  const { status, error, isValid, component } = useConvesioPayCheckout(
+    mountRef,
+    {
+      customerEmail,
+      theme: "dark",
+    },
+  );
 
   useEffect(() => {
     onValidityChange?.(isValid);
   }, [isValid, onValidityChange]);
+
+  useEffect(() => {
+    if (component) onComponentReady?.(component);
+  }, [component, onComponentReady]);
 
   return (
     <SectionCard section="payment-info" title={copy.title}>
