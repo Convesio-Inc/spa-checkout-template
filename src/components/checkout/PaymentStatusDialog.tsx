@@ -45,17 +45,17 @@ import type {
 function PaymentResultDetails({ result }: { result: PaymentResponse | null }) {
   if (!result?.orderNumber && !result?.id) return null;
   return (
-    <dl className="mx-auto grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+    <dl className="mx-auto grid max-w-full grid-cols-[auto_1fr] items-baseline gap-x-4 gap-y-1 text-xs">
       {result?.orderNumber && (
         <>
           <dt className="text-muted-foreground">Order</dt>
-          <dd className="font-mono">{result.orderNumber}</dd>
+          <dd className="font-mono break-all">{result.orderNumber}</dd>
         </>
       )}
       {result?.id && (
         <>
           <dt className="text-muted-foreground">Payment ID</dt>
-          <dd className="font-mono">{result.id}</dd>
+          <dd className="font-mono break-all">{result.id}</dd>
         </>
       )}
     </dl>
@@ -88,7 +88,7 @@ export function PaymentStatusDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         data-slot="payment-status-dialog"
-        className="max-w-xl!"
+        className="max-w-2xl!"
         showCloseButton={!isProcessing}
         onInteractOutside={(event) => {
           if (isProcessing) event.preventDefault();
