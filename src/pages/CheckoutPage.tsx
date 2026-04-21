@@ -19,6 +19,11 @@
  * All copy, images, and pricing come from `src/content/checkout.ts`.
  * All colors come from the `BRAND THEME` block in `src/index.css`.
  *
+ * Layout (top to bottom, all inside a single `max-w-5xl` content column):
+ *   - CheckoutHeader  — floating card matching the section cards below
+ *   - Two-column grid — form stack + order summary
+ *   - CheckoutFooter  — plain centered copyright line, no card chrome
+ *
  * Markers:
  *   - root            data-page="checkout"
  *   - form column     data-region="form-stack"
@@ -28,6 +33,8 @@
 
 import { useCallback, useRef, useState } from "react";
 
+import { CheckoutFooter } from "@/components/checkout/CheckoutFooter";
+import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
 import {
   CustomerInfoCard,
   type CustomerInfoValue,
@@ -73,8 +80,15 @@ export function CheckoutPage() {
 
   const { status, error, result, pay, reset } = useCheckoutPayment();
 
-  const { product, customer: customerCopy, shipping: shippingCopy, payment, summary } =
-    checkoutContent;
+  const {
+    brand,
+    product,
+    customer: customerCopy,
+    shipping: shippingCopy,
+    payment,
+    summary,
+    footer,
+  } = checkoutContent;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -107,45 +121,55 @@ export function CheckoutPage() {
   const isProcessing = status === "processing";
 
   return (
-    <main data-page="checkout" className="min-h-dvh bg-background py-6 sm:py-10">
-      <form
-        onSubmit={handleSubmit}
-        className="mx-auto w-full max-w-5xl px-4 sm:px-6"
-      >
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr] lg:items-start">
-          {/* #region SECTION: Form Stack */}
-          <div data-region="form-stack" className="flex flex-col gap-4">
-            <CustomerInfoCard
-              copy={customerCopy}
-              value={customer}
-              onChange={setCustomer}
-            />
-            <ShippingInfoCard
-              copy={shippingCopy}
-              value={shipping}
-              onChange={setShipping}
-            />
-            <PaymentInfoCard
-              copy={payment}
-              customerEmail={customer.email || undefined}
-              onValidityChange={setIsPaymentValid}
-              onComponentReady={handleComponentReady}
-            />
-          </div>
-          {/* #endregion */}
+    <main
+      data-page="checkout"
+      className="min-h-dvh bg-background py-6 sm:py-10"
+    >
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 sm:px-6">
+        <CheckoutHeader
+          brand={brand}
+          productName={product.name}
+          productHeroImage={product.heroImage}
+        />
 
-          {/* #region SECTION: Order Summary */}
-          <div data-region="summary" className="lg:sticky lg:top-6">
-            <OrderSummaryCard
-              copy={summary}
-              product={product}
-              payDisabled={!isPaymentValid}
-              payLoading={isProcessing}
-            />
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr] lg:items-start">
+            {/* #region SECTION: Form Stack */}
+            <div data-region="form-stack" className="flex flex-col gap-4">
+              <CustomerInfoCard
+                copy={customerCopy}
+                value={customer}
+                onChange={setCustomer}
+              />
+              <ShippingInfoCard
+                copy={shippingCopy}
+                value={shipping}
+                onChange={setShipping}
+              />
+              <PaymentInfoCard
+                copy={payment}
+                customerEmail={customer.email || undefined}
+                onValidityChange={setIsPaymentValid}
+                onComponentReady={handleComponentReady}
+              />
+            </div>
+            {/* #endregion */}
+
+            {/* #region SECTION: Order Summary */}
+            <div data-region="summary" className="lg:sticky lg:top-6">
+              <OrderSummaryCard
+                copy={summary}
+                product={product}
+                payDisabled={!isPaymentValid}
+                payLoading={isProcessing}
+              />
+            </div>
+            {/* #endregion */}
           </div>
-          {/* #endregion */}
-        </div>
-      </form>
+        </form>
+
+        <CheckoutFooter brandName={brand.name} copy={footer} />
+      </div>
 
       <PaymentStatusDialog
         status={status}

@@ -8,11 +8,13 @@
  *
  * Structure:
  *   - PageCopy              Page heading + subtitle
+ *   - BrandConfig           Brand identity: name + icon shown in the header/footer
  *   - ProductConfig         The item being sold: image, name, unit price
  *   - CustomerFormCopy      Customer Information card copy (email)
  *   - ShippingFormCopy      Shipping Information card copy (name/street/city/zip)
  *   - PaymentFormCopy       Payment Information card copy (card/expiry/cvv)
  *   - SummaryConfig         Order summary chrome: heading, totals, Pay Now CTA
+ *   - FooterCopy            Optional suffix appended after the copyright line
  * -----------------------------------------------------------------------------
  */
 
@@ -26,10 +28,18 @@ export interface ProductImage {
   alt: string;
 }
 
+export interface BrandConfig {
+  name: string;
+  icon: ProductImage;
+}
+
 export interface ProductConfig {
   name: string;
   image: ProductImage;
   unitPrice: string;
+  /** Optional secondary image shown at the right of the page header. Leave
+   *  undefined to hide. */
+  heroImage?: ProductImage;
 }
 
 export interface CustomerFormCopy {
@@ -91,19 +101,35 @@ export interface SummaryConfig {
   currency: string;
 }
 
+export interface FooterCopy {
+  /** Optional text appended after the dynamic "© YYYY BrandName" line, e.g.
+   *  "All rights reserved.". Leave undefined to show only the copyright line. */
+  suffix?: string;
+}
+
 export interface CheckoutContent {
   page: PageCopy;
+  brand: BrandConfig;
   product: ProductConfig;
   customer: CustomerFormCopy;
   shipping: ShippingFormCopy;
   payment: PaymentFormCopy;
   summary: SummaryConfig;
+  footer: FooterCopy;
 }
 
 export const checkoutContent: CheckoutContent = {
   page: {
     title: "Checkout",
     subtitle: "Simple dark mode checkout demo.",
+  },
+
+  brand: {
+    name: "Convesio",
+    icon: {
+      src: "/store-logo.jpeg",
+      alt: "Convesio logo",
+    },
   },
 
   product: {
@@ -113,6 +139,11 @@ export const checkoutContent: CheckoutContent = {
       alt: "Vitamin Essentials Pack product photo",
     },
     unitPrice: "$49.00",
+    // heroImage is optional — uncomment to show a thumbnail at the right of the header.
+    heroImage: {
+      src: "/product-image.jpeg",
+      alt: "Vitamin Essentials Pack product photo",
+    },
   },
 
   customer: {
@@ -162,5 +193,9 @@ export const checkoutContent: CheckoutContent = {
     ctaFootnote: "By clicking Complete Checkout, you agree to the Terms of Sale.",
     amountMinor: 5695,
     currency: "USD",
+  },
+
+  footer: {
+    suffix: "All rights reserved.",
   },
 };
