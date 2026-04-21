@@ -53,12 +53,12 @@
  *   --brand-accent     Pay Now hover fill
  */
 :root {
-    --brand: oklch(0.66 0.19 262);
+    --brand: oklch(0.2861 0.0429 162.59);
     --brand-foreground: oklch(0.99 0 0);
     --brand-accent: oklch(0.58 0.17 262);
     --brand-accent-foreground: oklch(0.99 0 0);
 
-    --background: oklch(0.99 0.005 260);
+    --background: oklch(0.9722 0.0085 128.56);
     --foreground: oklch(0.18 0.015 260);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.18 0.015 260);
