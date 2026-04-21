@@ -18,6 +18,7 @@ export interface PriceRowProps extends React.ComponentProps<"div"> {
   line: PriceLine;
   labelClassName?: string;
   valueClassName?: string;
+  href?: string;
 }
 
 export function PriceRow({
@@ -25,6 +26,7 @@ export function PriceRow({
   className,
   labelClassName,
   valueClassName,
+  href,
   ...rest
 }: PriceRowProps) {
   return (
@@ -37,9 +39,18 @@ export function PriceRow({
       )}
       {...rest}
     >
-      <span className={cn("text-foreground", labelClassName)}>
-        {line.label}
-      </span>
+      {href ? (
+        <a
+          href={href}
+          className={cn("text-foreground underline", labelClassName)}
+        >
+          {line.label}
+        </a>
+      ) : (
+        <span className={cn("text-foreground", labelClassName)}>
+          {line.label}
+        </span>
+      )}
       <span
         data-slot="price-value"
         className={cn("font-semibold text-foreground", valueClassName)}

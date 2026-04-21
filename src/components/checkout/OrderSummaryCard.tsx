@@ -83,6 +83,7 @@ export function OrderSummaryCard({
       <div className="flex flex-col gap-2">
         <PriceRow
           data-slot="product-line"
+          href="/product"
           line={{
             id: "product",
             label: product.name,
