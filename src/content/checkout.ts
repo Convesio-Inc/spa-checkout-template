@@ -223,7 +223,7 @@ export const checkoutContent: CheckoutContent = {
   },
 
   productPage: {
-    ctaLabel: "Add to Cart",
+    ctaLabel: "Proceed to Checkout",
   },
 
   customer: {
@@ -275,7 +275,7 @@ export const checkoutContent: CheckoutContent = {
     shipping: { id: "shipping", label: "Shipping", value: "$7.95" },
     tax: { id: "tax", label: "Tax", value: "$0.00" },
     total: { id: "total", label: "Total", value: "$56.95" },
-    ctaLabel: "Complete Checkout",
+    ctaLabel: "Pay Now",
     ctaFootnote: "By clicking Complete Checkout, you agree to the Terms of Sale.",
     amountMinor: 5695,
     currency: "USD",
