@@ -2,9 +2,8 @@
  * SectionCard
  * -----------------------------------------------------------------------------
  * Shared wrapper for the form sections (Customer / Shipping / Payment). Renders
- * a `<section>` with a titled header separated from previous sections by a top
- * border, so the entire form column looks like a single card with labelled
- * groups inside it.
+ * a `<section>` as a self-contained card with a titled header, so each section
+ * in the form column is visually distinct.
  *
  * Markers:
  *   - root             data-section="<section>" + data-slot="section-card"
@@ -33,7 +32,7 @@ export function SectionCard({
       data-section={section}
       data-slot="section-card"
       className={cn(
-        "flex flex-col gap-3 border-t border-border pt-4 first:border-t-0 first:pt-0",
+        "flex flex-col gap-3 rounded-xl border border-border bg-card p-5 text-card-foreground",
         className
       )}
       {...rest}

@@ -73,7 +73,7 @@ export function CheckoutPage() {
 
   const { status, error, result, pay, reset } = useCheckoutPayment();
 
-  const { page, product, customer: customerCopy, shipping: shippingCopy, payment, summary } =
+  const { product, customer: customerCopy, shipping: shippingCopy, payment, summary } =
     checkoutContent;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -114,25 +114,7 @@ export function CheckoutPage() {
       >
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr] lg:items-start">
           {/* #region SECTION: Form Stack */}
-          <div
-            data-region="form-stack"
-            className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 text-card-foreground"
-          >
-            <header data-section="page-header" className="flex flex-col gap-1">
-              <h1
-                data-slot="page-title"
-                className="text-2xl font-bold tracking-tight"
-              >
-                {page.title}
-              </h1>
-              <p
-                data-slot="page-subtitle"
-                className="text-sm text-muted-foreground"
-              >
-                {page.subtitle}
-              </p>
-            </header>
-
+          <div data-region="form-stack" className="flex flex-col gap-4">
             <CustomerInfoCard
               copy={customerCopy}
               value={customer}

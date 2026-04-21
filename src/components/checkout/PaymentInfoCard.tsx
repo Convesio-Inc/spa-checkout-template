@@ -44,7 +44,7 @@ export function PaymentInfoCard({
     mountRef,
     {
       customerEmail,
-      theme: "dark",
+      theme: "light",
     },
   );
 
