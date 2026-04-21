@@ -16,6 +16,7 @@
 
 import { CheckCircle2Icon } from "lucide-react";
 
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { BrandConfig } from "@/content/checkout";
 
 export interface ThankYouHeaderProps {
@@ -30,46 +31,47 @@ export function ThankYouHeader({
   subheading,
 }: ThankYouHeaderProps) {
   return (
-    <header
-      data-section="thank-you-header"
-      className="flex flex-col rounded-xl border border-border bg-card p-5 text-card-foreground"
-    >
-      <div className="flex items-center justify-between">
-        <img
-          data-slot="brand-icon"
-          src={brand.icon.src}
-          alt={brand.icon.alt}
-          className="h-16 w-16 rounded-lg object-cover"
-        />
-        <span
-          data-slot="brand-name"
-          className="text-xs font-semibold uppercase tracking-[0.14em] text-brand"
-        >
-          {brand.name}
-        </span>
-      </div>
+    <>
+      <Card data-section="thank-you-brand-header">
+        <CardContent className="flex items-center justify-between">
+          <img
+            data-slot="brand-icon"
+            src={brand.icon.src}
+            alt={brand.icon.alt}
+            className="h-9 w-9 shrink-0 rounded-lg border border-brand/40 object-cover"
+          />
+          <span
+            data-slot="brand-name"
+            className="text-xs font-semibold uppercase tracking-[0.14em] text-brand"
+          >
+            {brand.name}
+          </span>
+        </CardContent>
+      </Card>
 
-      <div className="mt-6 flex flex-col items-center gap-3 pb-2 text-center">
-        <div
-          data-slot="confirmation-icon"
-          aria-hidden="true"
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10"
-        >
-          <CheckCircle2Icon className="h-8 w-8 text-emerald-500" />
-        </div>
-        <h1
-          data-slot="confirmation-heading"
-          className="text-2xl font-bold tracking-tight text-foreground"
-        >
-          {heading}
-        </h1>
-        <p
-          data-slot="confirmation-subheading"
-          className="text-sm text-muted-foreground"
-        >
-          {subheading}
-        </p>
-      </div>
-    </header>
+      <Card data-section="thank-you-header">
+        <CardContent className="flex flex-col items-center gap-3 pb-2 text-center">
+          <div
+            data-slot="confirmation-icon"
+            aria-hidden="true"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10"
+          >
+            <CheckCircle2Icon className="h-8 w-8 text-emerald-500" />
+          </div>
+          <h1
+            data-slot="confirmation-heading"
+            className="text-2xl font-bold tracking-tight text-foreground"
+          >
+            {heading}
+          </h1>
+          <p
+            data-slot="confirmation-subheading"
+            className="text-sm text-muted-foreground"
+          >
+            {subheading}
+          </p>
+        </CardContent>
+      </Card>
+    </>
   );
 }

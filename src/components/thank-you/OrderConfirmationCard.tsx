@@ -50,7 +50,7 @@ export function OrderConfirmationCard({
           className="h-14 w-14 shrink-0 rounded-lg border border-border object-cover"
         />
         <PriceRow
-          line={{ id: "product", label: product.name, value: product.unitPrice }}
+          line={{ id: "product", label: product.name, value: product.salePrice }}
           className="flex-1"
           labelClassName="font-medium"
           href="/product"

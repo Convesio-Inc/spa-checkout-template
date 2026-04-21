@@ -19,6 +19,8 @@ export interface PriceRowProps extends React.ComponentProps<"div"> {
   labelClassName?: string;
   valueClassName?: string;
   href?: string;
+  /** Optional compare-at price shown with a strikethrough before the main value. */
+  regularValue?: string;
 }
 
 export function PriceRow({
@@ -27,6 +29,7 @@ export function PriceRow({
   labelClassName,
   valueClassName,
   href,
+  regularValue,
   ...rest
 }: PriceRowProps) {
   return (
@@ -51,11 +54,21 @@ export function PriceRow({
           {line.label}
         </span>
       )}
-      <span
-        data-slot="price-value"
-        className={cn("font-semibold text-foreground", valueClassName)}
-      >
-        {line.value}
+      <span className="flex items-baseline gap-1.5">
+        {regularValue && (
+          <span
+            data-slot="regular-price"
+            className="text-xs text-muted-foreground line-through"
+          >
+            {regularValue}
+          </span>
+        )}
+        <span
+          data-slot="price-value"
+          className={cn("font-semibold text-foreground", valueClassName)}
+        >
+          {line.value}
+        </span>
       </span>
     </div>
   );

@@ -31,6 +31,7 @@
  * -----------------------------------------------------------------------------
  */
 
+import { Card, CardContent } from "@/components/ui/card";
 import type { BrandConfig, ProductImage } from "@/content/checkout";
 
 export interface CheckoutHeaderProps {
@@ -47,48 +48,47 @@ export function CheckoutHeader({
   productHeroImage,
 }: CheckoutHeaderProps) {
   return (
-    <header
-      data-section="checkout-header"
-      className="flex items-start gap-4 rounded-xl border border-border bg-card p-5 text-card-foreground sm:gap-5"
-    >
-      <img
-        data-slot="brand-icon"
-        src={brand.icon.src}
-        alt={brand.icon.alt}
-        className="h-10 w-10 shrink-0 rounded-lg border border-brand/40 object-cover sm:h-11 sm:w-11"
-      />
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span
-          data-slot="brand-name"
-          className="text-xs font-semibold uppercase tracking-[0.14em] text-brand"
-        >
-          {brand.name}
-        </span>
-        <h1
-          data-slot="product-name"
-          className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl md:text-3xl"
-        >
-          {productName}
-        </h1>
-        {productDescription && (
-          <p
-            data-slot="product-description"
-            className="mt-0.5 text-sm text-muted-foreground"
-          >
-            {productDescription}
-          </p>
-        )}
-      </div>
-
-      {productHeroImage && (
+    <Card data-section="checkout-header">
+      <CardContent className="flex items-start gap-4 sm:gap-5">
         <img
-          data-slot="product-hero"
-          src={productHeroImage.src}
-          alt={productHeroImage.alt}
-          className="hidden h-14 sm:h-24 shrink-0 rounded-lg border border-border object-cover sm:block w-full sm:w-40"
+          data-slot="brand-icon"
+          src={brand.icon.src}
+          alt={brand.icon.alt}
+          className="h-10 w-10 shrink-0 rounded-lg border border-brand/40 object-cover sm:h-11 sm:w-11"
         />
-      )}
-    </header>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span
+            data-slot="brand-name"
+            className="text-xs font-semibold uppercase tracking-[0.14em] text-brand"
+          >
+            {brand.name}
+          </span>
+          <h1
+            data-slot="product-name"
+            className="truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl md:text-3xl"
+          >
+            {productName}
+          </h1>
+          {productDescription && (
+            <p
+              data-slot="product-description"
+              className="mt-0.5 text-sm text-muted-foreground"
+            >
+              {productDescription}
+            </p>
+          )}
+        </div>
+
+        {productHeroImage && (
+          <img
+            data-slot="product-hero"
+            src={productHeroImage.src}
+            alt={productHeroImage.alt}
+            className="hidden h-14 sm:h-24 shrink-0 rounded-lg border border-border object-cover sm:block w-full sm:w-40"
+          />
+        )}
+      </CardContent>
+    </Card>
   );
 }

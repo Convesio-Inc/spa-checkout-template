@@ -13,9 +13,10 @@
 
 import * as React from "react";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-export interface SectionCardProps extends React.ComponentProps<"section"> {
+export interface SectionCardProps extends React.ComponentProps<"div"> {
   section: string;
   title: string;
 }
@@ -28,22 +29,23 @@ export function SectionCard({
   ...rest
 }: SectionCardProps) {
   return (
-    <section
+    <Card
       data-section={section}
       data-slot="section-card"
-      className={cn(
-        "flex flex-col gap-3 rounded-xl border border-border bg-card p-5 text-card-foreground",
-        className
-      )}
+      className={cn(className)}
       {...rest}
     >
-      <h2
-        data-slot="section-title"
-        className="text-base font-semibold tracking-tight"
-      >
-        {title}
-      </h2>
-      <div className="flex flex-col gap-3">{children}</div>
-    </section>
+      <CardHeader>
+        <CardTitle
+          data-slot="section-title"
+          className="text-base font-semibold tracking-tight"
+        >
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-3">{children}</div>
+      </CardContent>
+    </Card>
   );
 }

@@ -13,7 +13,7 @@ export function ThankYouPage() {
 
   return (
     <main data-page="thank-you" className="min-h-dvh bg-background py-6 sm:py-10">
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 sm:px-6">
 
         {/* #region SECTION: Thank-You Header */}
         <ThankYouHeader
