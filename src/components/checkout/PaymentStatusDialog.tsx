@@ -7,6 +7,11 @@
  *                   outside clicks + escape + hides the close `X`).
  *   - "success"     Check icon + "Payment complete" with order details.
  *                   Dismissable via the "Close" button.
+ *   - "pending"     Clock icon + "Payment is being processed" with order
+ *                   details. Used when ConvesioPay returns `status: "Pending"`,
+ *                   i.e. the transaction passed initial checks but still needs
+ *                   to be accepted/denied via an async webhook the worker
+ *                   can't observe. Dismissable via the "Close" button.
  *   - "failed"      Alert icon + "Payment failed" with the error message.
  *                   Dismissable via the "Try again" button, which calls
  *                   `onClose` so the parent can reset back to `"idle"`.
@@ -20,7 +25,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { CheckCircle2Icon, XCircleIcon } from "lucide-react";
+import { CheckCircle2Icon, ClockIcon, XCircleIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +41,26 @@ import type {
   CheckoutPaymentStatus,
   PaymentResponse,
 } from "@/hooks/useCheckoutPayment";
+
+function PaymentResultDetails({ result }: { result: PaymentResponse | null }) {
+  if (!result?.orderNumber && !result?.id) return null;
+  return (
+    <dl className="mx-auto grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+      {result?.orderNumber && (
+        <>
+          <dt className="text-muted-foreground">Order</dt>
+          <dd className="font-mono">{result.orderNumber}</dd>
+        </>
+      )}
+      {result?.id && (
+        <>
+          <dt className="text-muted-foreground">Payment ID</dt>
+          <dd className="font-mono">{result.id}</dd>
+        </>
+      )}
+    </dl>
+  );
+}
 
 export interface PaymentStatusDialogProps {
   status: CheckoutPaymentStatus;
@@ -104,22 +129,32 @@ export function PaymentStatusDialog({
                 Thanks! Your payment went through successfully.
               </DialogDescription>
             </DialogHeader>
-            {(result?.orderNumber || result?.id) && (
-              <dl className="mx-auto grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-                {result?.orderNumber && (
-                  <>
-                    <dt className="text-muted-foreground">Order</dt>
-                    <dd className="font-mono">{result.orderNumber}</dd>
-                  </>
-                )}
-                {result?.id && (
-                  <>
-                    <dt className="text-muted-foreground">Payment ID</dt>
-                    <dd className="font-mono">{result.id}</dd>
-                  </>
-                )}
-              </dl>
-            )}
+            <PaymentResultDetails result={result} />
+            <DialogFooter>
+              <Button type="button" onClick={onClose}>
+                Close
+              </Button>
+            </DialogFooter>
+          </>
+        )}
+
+        {status === "pending" && (
+          <>
+            <div
+              data-slot="payment-status-icon"
+              className="mx-auto flex size-12 items-center justify-center rounded-full bg-amber-500/10 text-amber-500"
+            >
+              <ClockIcon className="size-6" />
+            </div>
+            <DialogHeader className="items-center text-center">
+              <DialogTitle>Payment is being processed</DialogTitle>
+              <DialogDescription>
+                We've received your payment and it's going through a final
+                review. You'll get a confirmation as soon as it's
+                approved — you don't need to pay again.
+              </DialogDescription>
+            </DialogHeader>
+            <PaymentResultDetails result={result} />
             <DialogFooter>
               <Button type="button" onClick={onClose}>
                 Close

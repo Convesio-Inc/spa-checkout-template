@@ -5,9 +5,9 @@
  * flow. Exposes:
  *
  *   {
- *     status,   // "idle" | "processing" | "success" | "failed"
+ *     status,   // "idle" | "processing" | "success" | "pending" | "failed"
  *     error,    // Error, only set while status === "failed"
- *     result,   // PaymentResponse, only set while status === "success"
+ *     result,   // PaymentResponse, set while status === "success" | "pending"
  *     pay,      // (component, payload) => Promise<void>
  *     reset,    // () => void — returns to "idle"
  *   }
@@ -17,7 +17,13 @@
  *   1. `component.createToken()` to get a `paymentToken` from the SDK.
  *   2. `POST /payments` on our worker with the token + customer/shipping
  *      fields, which forwards server-side to the ConvesioPay API.
- *   3. Maps the response into `success` / `failed`.
+ *   3. Maps the response into `success` / `pending` / `failed`.
+ *
+ * "Pending" is the ConvesioPay status we get when the merchant has checkout
+ * configured so the transaction is validated after initial checks but still
+ * needs to be accepted/denied through an async webhook. The worker has no way
+ * to block on that webhook, so we surface it to the user as a dedicated state
+ * instead of claiming the payment succeeded.
  *
  * All errors (SDK tokenization, network, non-2xx, upstream `error: true`) land
  * on `status === "failed"` with a human-readable `error.message`.
@@ -30,6 +36,7 @@ export type CheckoutPaymentStatus =
   | "idle"
   | "processing"
   | "success"
+  | "pending"
   | "failed";
 
 export interface Address {
@@ -82,7 +89,8 @@ export interface UseCheckoutPaymentResult {
   reset: () => void;
 }
 
-const SUCCESS_STATUSES = new Set(["Succeeded", "Pending", "Authorized"]);
+const SUCCESS_STATUSES = new Set(["Succeeded", "Authorized"]);
+const PENDING_STATUSES = new Set(["Pending"]);
 
 export function useCheckoutPayment(): UseCheckoutPaymentResult {
   const [status, setStatus] = useState<CheckoutPaymentStatus>("idle");
@@ -142,7 +150,12 @@ export function useCheckoutPayment(): UseCheckoutPaymentResult {
         return;
       }
 
-      if (body && body.status && !SUCCESS_STATUSES.has(body.status)) {
+      if (
+        body &&
+        body.status &&
+        !SUCCESS_STATUSES.has(body.status) &&
+        !PENDING_STATUSES.has(body.status)
+      ) {
         setError(
           new Error(`Payment ${body.status.toLowerCase()}. Please try again.`),
         );
@@ -152,7 +165,11 @@ export function useCheckoutPayment(): UseCheckoutPaymentResult {
       }
 
       setResult(body);
-      setStatus("success");
+      setStatus(
+        body?.status && PENDING_STATUSES.has(body.status)
+          ? "pending"
+          : "success",
+      );
     },
     [],
   );
