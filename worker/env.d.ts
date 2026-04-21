@@ -8,6 +8,7 @@ interface Env {
   CPAY_CLIENT_KEY: string;
   CPAY_API_KEY: string;
   CPAY_SECRET: string;
+  CPAY_INTEGRATION: string;
   CPAY_ENVIRONMENT?: ConvesioPayEnvironmentValue;
 }
 

@@ -10,7 +10,7 @@
     "preview": "npm run build && vite preview",
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
-    "add-envs": "wrangler secret put CPAY_CLIENT_KEY && wrangler secret put CPAY_API_KEY && wrangler secret put CPAY_SECRET"
+    "add-envs": "wrangler secret put CPAY_CLIENT_KEY && wrangler secret put CPAY_API_KEY && wrangler secret put CPAY_SECRET && wrangler secret put CPAY_INTEGRATION"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",
