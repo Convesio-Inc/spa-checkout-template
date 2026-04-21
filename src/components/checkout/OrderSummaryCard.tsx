@@ -17,6 +17,7 @@
  *   - total line        data-slot="total-line"
  *   - primary cta       data-slot="cta-primary"
  *   - cta footnote      data-slot="cta-footnote"
+ *
  * -----------------------------------------------------------------------------
  */
 
@@ -28,9 +29,15 @@ import type { ProductConfig, SummaryConfig } from "@/content/checkout";
 export interface OrderSummaryCardProps {
   copy: SummaryConfig;
   product: ProductConfig;
+  /** When true the Pay Now button is non-interactive. Defaults to false. */
+  payDisabled?: boolean;
 }
 
-export function OrderSummaryCard({ copy, product }: OrderSummaryCardProps) {
+export function OrderSummaryCard({
+  copy,
+  product,
+  payDisabled = false,
+}: OrderSummaryCardProps) {
   const handlePayNow = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (import.meta.env.DEV) {
@@ -88,6 +95,8 @@ export function OrderSummaryCard({ copy, product }: OrderSummaryCardProps) {
         type="button"
         size="lg"
         onClick={handlePayNow}
+        disabled={payDisabled}
+        aria-disabled={payDisabled}
         className="mt-1 h-12 w-full rounded-lg bg-brand text-base font-semibold text-brand-foreground hover:bg-brand-accent"
       >
         {copy.ctaLabel}

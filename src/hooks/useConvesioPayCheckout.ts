@@ -7,13 +7,22 @@
  *      the whole app — see `fetchConvesioPayConfig`).
  *   2. Lazily initializes the ConvesioPay SDK instance (once per page load).
  *   3. Creates + mounts a component inside the provided container `ref`.
+ *   4. Subscribes to the component's `change` event and derives `isValid`,
+ *      so callers can gate a Pay Now button behind it.
  *
- * It returns `{ status, component, error }`:
+ * Returned shape:
  *
- *   - `status` is `"loading" | "ready" | "error"`, handy for rendering fallbacks.
- *   - `component` is the mounted ConvesioPay component (use it to call
- *     `updateEmail` as the cart changes, or to attach events).
- *   - `error` surfaces any config-fetch / init / mount failure.
+ *   {
+ *     status,            // "loading" | "ready" | "error"
+ *     component,         // mounted ConvesioPayComponent (or null)
+ *     config,            // fetched /config payload (or null)
+ *     error,             // any config / init / mount failure
+ *     isValid,           // true when the last change event reports a
+ *                        // submittable state (card: isValid, accelerated:
+ *                        // isSuccessful). Starts at false.
+ *     lastChangeEvent,   // raw payload from the most recent change event
+ *                        // for callers that need `errors` / `valid` fields.
+ *   }
  *
  * The mount runs only when the container ref resolves and is guarded against
  * React 18 StrictMode's effect double-invocation via a ref latch.
@@ -56,8 +65,16 @@ export type ConvesioPayCheckoutOptions = Omit<
 export interface UseConvesioPayCheckoutResult {
   status: ConvesioPayCheckoutStatus;
   component: ConvesioPayComponent | null;
-  error: Error | null;
   config: ConvesioPayConfig | null;
+  error: Error | null;
+  isValid: boolean;
+  lastChangeEvent: ConvesioPayChangeEvent | null;
+}
+
+function deriveIsValid(event: ConvesioPayChangeEvent): boolean {
+  if ("isValid" in event) return event.isValid === true;
+  if ("isSuccessful" in event) return event.isSuccessful === true;
+  return false;
 }
 
 export function useConvesioPayCheckout(
@@ -67,6 +84,9 @@ export function useConvesioPayCheckout(
   const [config, setConfig] = useState<ConvesioPayConfig | null>(null);
   const [component, setComponent] = useState<ConvesioPayComponent | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [isValid, setIsValid] = useState(false);
+  const [lastChangeEvent, setLastChangeEvent] =
+    useState<ConvesioPayChangeEvent | null>(null);
   const mountedRef = useRef(false);
 
   useEffect(() => {
@@ -97,20 +117,35 @@ export function useConvesioPayCheckout(
       });
       instance.mount(ensureSelector(containerRef.current));
       mountedRef.current = true;
-      // One-shot status flip after the SDK mounts its iframe — this runs at
-      // most once per page load (guarded by mountedRef), so there is no
-      // cascade-render risk the lint rule is warning about.
+      // One-shot status flip after the SDK mounts its iframe — guarded by
+      // mountedRef, so there's no cascading-render risk.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setComponent(instance);
     } catch (err) {
       setError(err instanceof Error ? err : new Error(String(err)));
     }
-    // We intentionally do NOT depend on `options`: the component is mounted
-    // once and callers should drive updates via component.updateEmail /
-    // Re-running this effect would create a duplicate
+    // Intentionally ignoring `options`: the component is mounted once, and
+    // callers should drive updates via component.updateEmail /
+    // component.updateAmount. Re-running this effect would create a duplicate
     // component in the same container.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, containerRef]);
+
+  useEffect(() => {
+    if (!component) return;
+
+    const handleChange = (event: ConvesioPayChangeEvent) => {
+      setLastChangeEvent(event);
+      setIsValid(deriveIsValid(event));
+    };
+
+    component.on("change", handleChange);
+
+    return () => {
+      // `off` is not documented as guaranteed; call it defensively.
+      component.off?.("change", handleChange);
+    };
+  }, [component]);
 
   const status: ConvesioPayCheckoutStatus = error
     ? "error"
@@ -118,5 +153,12 @@ export function useConvesioPayCheckout(
       ? "ready"
       : "loading";
 
-  return { status, component, error, config };
+  return {
+    status,
+    component,
+    config,
+    error,
+    isValid,
+    lastChangeEvent,
+  };
 }

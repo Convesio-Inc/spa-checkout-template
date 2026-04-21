@@ -17,7 +17,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 import { useConvesioPayCheckout } from "@/hooks/useConvesioPayCheckout";
@@ -26,14 +26,24 @@ import type { PaymentFormCopy } from "@/content/checkout";
 export interface PaymentInfoCardProps {
   copy: PaymentFormCopy;
   customerEmail?: string;
+  /** Fires whenever the ConvesioPay component reports a validity change. */
+  onValidityChange?: (isValid: boolean) => void;
 }
 
-export function PaymentInfoCard({ copy, customerEmail }: PaymentInfoCardProps) {
+export function PaymentInfoCard({
+  copy,
+  customerEmail,
+  onValidityChange,
+}: PaymentInfoCardProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
-  const { status, error } = useConvesioPayCheckout(mountRef, {
+  const { status, error, isValid } = useConvesioPayCheckout(mountRef, {
     customerEmail,
     theme: "dark",
   });
+
+  useEffect(() => {
+    onValidityChange?.(isValid);
+  }, [isValid, onValidityChange]);
 
   return (
     <SectionCard section="payment-info" title={copy.title}>

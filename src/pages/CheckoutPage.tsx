@@ -18,6 +18,8 @@
  * -----------------------------------------------------------------------------
  */
 
+import { useState } from "react";
+
 import { CustomerInfoCard } from "@/components/checkout/CustomerInfoCard";
 import { OrderSummaryCard } from "@/components/checkout/OrderSummaryCard";
 import { PaymentInfoCard } from "@/components/checkout/PaymentInfoCard";
@@ -25,7 +27,9 @@ import { ShippingInfoCard } from "@/components/checkout/ShippingInfoCard";
 import { checkoutContent } from "@/content/checkout";
 
 export function CheckoutPage() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const [isPaymentValid, setIsPaymentValid] = useState(false);
+
+  const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
   };
 
@@ -62,7 +66,10 @@ export function CheckoutPage() {
 
             <CustomerInfoCard copy={customer} />
             <ShippingInfoCard copy={shipping} />
-            <PaymentInfoCard copy={payment} />
+            <PaymentInfoCard
+              copy={payment}
+              onValidityChange={setIsPaymentValid}
+            />
           </div>
           {/* #endregion */}
 
@@ -71,6 +78,7 @@ export function CheckoutPage() {
             <OrderSummaryCard
               copy={summary}
               product={product}
+              payDisabled={!isPaymentValid}
             />
           </div>
           {/* #endregion */}
