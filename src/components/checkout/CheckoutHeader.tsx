@@ -13,18 +13,21 @@
  * Layout:
  *   [brand icon]   BRAND NAME (brand kicker)    [optional product hero image]
  *                  Product Name (large)
+ *                  Product description (optional, muted)
  *
  * The product hero image on the right is optional; pass `productHeroImage` to
  * enable it. It is hidden on narrow viewports so the title always has room.
+ * The product description is also optional; omit `productDescription` to hide.
  *
  * Content source: `checkoutContent.brand` + `checkoutContent.product`
  *
  * Markers:
- *   - root                data-section="checkout-header"
- *   - brand icon          data-slot="brand-icon"
- *   - brand name          data-slot="brand-name"
- *   - product name        data-slot="product-name"
- *   - product hero image  data-slot="product-hero"
+ *   - root                 data-section="checkout-header"
+ *   - brand icon           data-slot="brand-icon"
+ *   - brand name           data-slot="brand-name"
+ *   - product name         data-slot="product-name"
+ *   - product description  data-slot="product-description"
+ *   - product hero image   data-slot="product-hero"
  * -----------------------------------------------------------------------------
  */
 
@@ -33,18 +36,20 @@ import type { BrandConfig, ProductImage } from "@/content/checkout";
 export interface CheckoutHeaderProps {
   brand: BrandConfig;
   productName: string;
+  productDescription?: string;
   productHeroImage?: ProductImage;
 }
 
 export function CheckoutHeader({
   brand,
   productName,
+  productDescription,
   productHeroImage,
 }: CheckoutHeaderProps) {
   return (
     <header
       data-section="checkout-header"
-      className="flex items-center gap-4 rounded-xl border border-border bg-card p-5 text-card-foreground sm:gap-5"
+      className="flex items-start gap-4 rounded-xl border border-border bg-card p-5 text-card-foreground sm:gap-5"
     >
       <img
         data-slot="brand-icon"
@@ -66,6 +71,14 @@ export function CheckoutHeader({
         >
           {productName}
         </h1>
+        {productDescription && (
+          <p
+            data-slot="product-description"
+            className="mt-0.5 text-sm text-muted-foreground"
+          >
+            {productDescription}
+          </p>
+        )}
       </div>
 
       {productHeroImage && (
@@ -73,7 +86,7 @@ export function CheckoutHeader({
           data-slot="product-hero"
           src={productHeroImage.src}
           alt={productHeroImage.alt}
-          className="hidden h-14 shrink-0 rounded-lg border border-border object-cover sm:block sm:h-16 sm:w-24"
+          className="hidden h-14 sm:h-24 shrink-0 rounded-lg border border-border object-cover sm:block w-full sm:w-40"
         />
       )}
     </header>
