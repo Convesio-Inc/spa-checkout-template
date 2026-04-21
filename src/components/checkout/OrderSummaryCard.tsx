@@ -20,6 +20,7 @@
  *   - total line        data-slot="total-line"
  *   - primary cta       data-slot="cta-primary"
  *   - cta footnote      data-slot="cta-footnote"
+ *   - guarantee         data-slot="guarantee-badge"
  *
  * -----------------------------------------------------------------------------
  */
@@ -27,12 +28,21 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { GuaranteeBadge } from "@/components/checkout/primitives/GuaranteeBadge";
 import { PriceRow } from "@/components/checkout/primitives/PriceRow";
-import type { ProductConfig, SummaryConfig } from "@/content/checkout";
+import { SecureBadge } from "@/components/checkout/primitives/SecureBadge";
+import type {
+  GuaranteeCopy,
+  ProductConfig,
+  SecurityCopy,
+  SummaryConfig,
+} from "@/content/checkout";
 
 export interface OrderSummaryCardProps {
   copy: SummaryConfig;
   product: ProductConfig;
+  security: SecurityCopy;
+  guarantee: GuaranteeCopy;
   /** When true the Pay Now button is non-interactive. Defaults to false. */
   payDisabled?: boolean;
   /** When true the button shows a spinner and stays disabled. */
@@ -42,6 +52,8 @@ export interface OrderSummaryCardProps {
 export function OrderSummaryCard({
   copy,
   product,
+  security,
+  guarantee,
   payDisabled = false,
   payLoading = false,
 }: OrderSummaryCardProps) {
@@ -102,12 +114,22 @@ export function OrderSummaryCard({
         {copy.ctaLabel}
       </Button>
 
+      <SecureBadge label={security.label} className="self-center" />
+
       <p
         data-slot="cta-footnote"
         className="text-xs leading-relaxed text-muted-foreground"
       >
         {copy.ctaFootnote}
       </p>
+
+      <GuaranteeBadge
+        days={guarantee.days}
+        daysLabel={guarantee.daysLabel}
+        title={guarantee.title}
+        description={guarantee.description}
+        className="mt-1"
+      />
     </aside>
   );
 }

@@ -42,6 +42,7 @@ import {
 import { OrderSummaryCard } from "@/components/checkout/OrderSummaryCard";
 import { PaymentInfoCard } from "@/components/checkout/PaymentInfoCard";
 import { PaymentStatusDialog } from "@/components/checkout/PaymentStatusDialog";
+import { SecureBadge } from "@/components/checkout/primitives/SecureBadge";
 import {
   ShippingInfoCard,
   type ShippingInfoValue,
@@ -87,6 +88,8 @@ export function CheckoutPage() {
     shipping: shippingCopy,
     payment,
     summary,
+    security,
+    guarantee,
     footer,
   } = checkoutContent;
 
@@ -132,6 +135,12 @@ export function CheckoutPage() {
           productHeroImage={product.heroImage}
         />
 
+        <SecureBadge
+          data-section="secure-notice"
+          label={security.label}
+          className="self-center"
+        />
+
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr] lg:items-start">
             {/* #region SECTION: Form Stack */}
@@ -160,6 +169,8 @@ export function CheckoutPage() {
               <OrderSummaryCard
                 copy={summary}
                 product={product}
+                security={security}
+                guarantee={guarantee}
                 payDisabled={!isPaymentValid}
                 payLoading={isProcessing}
               />
@@ -168,7 +179,11 @@ export function CheckoutPage() {
           </div>
         </form>
 
-        <CheckoutFooter brandName={brand.name} copy={footer} />
+        <CheckoutFooter
+          brandName={brand.name}
+          copy={footer}
+          security={security}
+        />
       </div>
 
       <PaymentStatusDialog

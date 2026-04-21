@@ -107,6 +107,24 @@ export interface FooterCopy {
   suffix?: string;
 }
 
+export interface SecurityCopy {
+  /** Short label shown next to the lock icon (e.g. "Secure Payment"). Used by
+   *  the centered notice under the header, inside the order summary, and in
+   *  the footer — a single source of truth so the wording stays consistent. */
+  label: string;
+}
+
+export interface GuaranteeCopy {
+  /** Number shown inside the circular seal on the guarantee badge. */
+  days: number;
+  /** Short label under the number inside the seal (e.g. "DAYS"). */
+  daysLabel: string;
+  /** Bold headline shown next to the seal (e.g. "100% Money Back Guarantee"). */
+  title: string;
+  /** Supporting description explaining the guarantee. */
+  description: string;
+}
+
 export interface CheckoutContent {
   page: PageCopy;
   brand: BrandConfig;
@@ -115,6 +133,8 @@ export interface CheckoutContent {
   shipping: ShippingFormCopy;
   payment: PaymentFormCopy;
   summary: SummaryConfig;
+  security: SecurityCopy;
+  guarantee: GuaranteeCopy;
   footer: FooterCopy;
 }
 
@@ -193,6 +213,18 @@ export const checkoutContent: CheckoutContent = {
     ctaFootnote: "By clicking Complete Checkout, you agree to the Terms of Sale.",
     amountMinor: 5695,
     currency: "USD",
+  },
+
+  security: {
+    label: "Secure Payment",
+  },
+
+  guarantee: {
+    days: 60,
+    daysLabel: "Days",
+    title: "100% Money Back Guarantee",
+    description:
+      "If you're not satisfied within 60 days, we'll refund every penny. No questions asked.",
   },
 
   footer: {
