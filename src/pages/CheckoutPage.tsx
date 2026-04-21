@@ -35,6 +35,7 @@ import { useCallback, useRef, useState } from "react";
 
 import { CheckoutFooter } from "@/components/checkout/CheckoutFooter";
 import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
+import { CheckoutTimer } from "@/components/checkout/CheckoutTimer";
 import {
   CustomerInfoCard,
   type CustomerInfoValue,
@@ -90,6 +91,7 @@ export function CheckoutPage() {
     summary,
     security,
     guarantee,
+    timer,
     footer,
   } = checkoutContent;
 
@@ -139,8 +141,11 @@ export function CheckoutPage() {
         <CheckoutHeader
           brand={brand}
           productName={product.name}
+          productDescription={product.description}
           productHeroImage={product.heroImage}
         />
+
+        <CheckoutTimer timer={timer} />
 
         <SecureBadge
           data-section="secure-notice"
