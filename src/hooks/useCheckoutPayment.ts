@@ -64,6 +64,11 @@ export interface PaymentPayload {
   lineItems?: LineItem[];
 }
 
+export interface PaymentActionRequired {
+  type?: string;
+  redirectUrl?: string;
+}
+
 export interface PaymentResponse {
   id?: string;
   orderNumber?: string;
@@ -74,7 +79,29 @@ export interface PaymentResponse {
    *  landed on a success or pending status). The hook navigates to this URL
    *  instead of surfacing the success/pending modal. */
   redirectUrl?: string;
+  /** Present when ConvesioPay flags the payment for a 3DS (or similar)
+   *  challenge. The hook stashes the payment id in sessionStorage and
+   *  navigates the user to `actionRequired.redirectUrl`; on return, the
+   *  thank-you page hydrates a proper `?token=<jwt>` URL via `/issue-token`. */
+  actionRequired?: PaymentActionRequired;
   [key: string]: unknown;
+}
+
+/** sessionStorage key used to bridge the 3DS challenge: we write the payment
+ *  id before navigating to the bank's challenge page, and the thank-you page
+ *  reads it back on return to mint a fresh thank-you JWT. Exported so the
+ *  thank-you hook can import the same constant. */
+export const PENDING_PAYMENT_SESSION_KEY = "cpay_pending_payment";
+
+/** Payments older than this are ignored when reading the sessionStorage
+ *  hint. A 3DS challenge should never take this long, and a stale entry
+ *  usually means the user abandoned the flow and came back much later. */
+export const PENDING_PAYMENT_MAX_AGE_MS = 30 * 60 * 1000;
+
+export interface PendingPaymentSessionEntry {
+  payment_id: string;
+  order_number: string | null;
+  saved_at: number;
 }
 
 export interface PaymentErrorResponse {
@@ -151,6 +178,32 @@ export function useCheckoutPayment(): UseCheckoutPaymentResult {
           `Payment request failed (${response.status} ${response.statusText})`;
         setError(new Error(message));
         setStatus("failed");
+        return;
+      }
+
+      // 3DS handoff: ConvesioPay has flagged the payment and wants the user
+      // to complete a challenge on their hosted verify-customer page. Stash
+      // the payment id in sessionStorage so `/thank-you` can hydrate a JWT
+      // via `/issue-token` on return, then navigate out. The processing
+      // dialog is intentionally kept up — it visually covers the handoff.
+      if (body?.actionRequired?.redirectUrl && body.id) {
+        setResult(body);
+        try {
+          const entry: PendingPaymentSessionEntry = {
+            payment_id: body.id,
+            order_number: body.orderNumber ?? null,
+            saved_at: Date.now(),
+          };
+          window.sessionStorage.setItem(
+            PENDING_PAYMENT_SESSION_KEY,
+            JSON.stringify(entry),
+          );
+        } catch {
+          // sessionStorage disabled / quota exceeded — the SPA falls back to
+          // reading `?paymentId=` from the return URL if ConvesioPay appends
+          // it, so this isn't fatal.
+        }
+        window.location.assign(body.actionRequired.redirectUrl);
         return;
       }
 
