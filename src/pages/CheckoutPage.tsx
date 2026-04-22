@@ -130,7 +130,7 @@ export function CheckoutPage() {
   return (
     <main
       data-page="checkout"
-      className="min-h-dvh bg-background"
+      className="bg-background"
     >
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 sm:px-6">
         <CheckoutHeader />
