@@ -5,19 +5,23 @@
  * worker signed on success/pending, verifies it server-side, and drives a
  * state machine via `useThankYouPayment`:
  *
- *   - "verifying"  ThankYouHeader shows a subtle spinner + "confirming"
- *                  copy while the worker verifies the token.
- *   - "pending"    Same header treatment with "finalising" copy. The hook
- *                  polls `/poll-payment` every 5s until the upstream status
- *                  flips to succeeded or failed — layout doesn't jump when
- *                  it does, the header just swaps icon and copy.
- *   - "succeeded"  Full thank-you layout — confirmed header, order summary,
- *                  next steps, guarantee.
- *   - "failed"     Single failure card (no header, no next-steps) pointing
- *                  the user back to the checkout to retry.
+ *   - "verifying"  Amber "Processing Payment" promo banner with a spinner +
+ *                  matching "Processing Your Payment" main-card copy, while
+ *                  the worker verifies the token.
+ *   - "pending"    Same promo banner and main-card copy as "verifying" — the
+ *                  hook polls `/poll-payment` every 5s until the upstream
+ *                  status flips to succeeded or failed. The layout doesn't
+ *                  jump on transition; banner + card copy swap in place.
+ *   - "succeeded"  Green "Order Confirmed" promo banner + "Thank You for
+ *                  Your Order" main-card copy, plus order details and the
+ *                  receipt sidebar.
+ *   - "failed"     Single failure card (no banner, no summary) pointing the
+ *                  user back to the checkout to retry.
  *
  * Markers:
  *   - page root            data-page="thank-you"
+ *   - promo banner         data-section="promo-banner" + data-status="..."
+ *   - main card            data-section="thank-you-main-card" + data-status
  *   - failure card         data-section="thank-you-failure"
  * -----------------------------------------------------------------------------
  */
@@ -28,6 +32,7 @@ import { useSearchParams } from "react-router";
 import { PriceRow } from "@/components/checkout/primitives/PriceRow";
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { checkoutContent } from "@/content/checkout";
 import { useThankYouPayment } from "@/hooks/useThankYouPayment";
 
@@ -41,6 +46,7 @@ export function ThankYouPage() {
   const { state, payload, error } = useThankYouPayment(token);
 
   const isFailed = state === "failed";
+  const isProcessing = state === "pending" || state === "verifying";
   const orderNumber = payload?.order_number
     ? `#${payload.order_number}`
     : "#CV-302948";
@@ -49,10 +55,15 @@ export function ThankYouPage() {
     day: "numeric",
     year: "numeric",
   }).format(new Date());
-  const paymentStatus =
-    state === "pending" || state === "verifying"
-      ? "Pending - Final review in progress"
-      : "Paid - Preparing Shipment";
+  const paymentStatus = isProcessing
+    ? "Pending - Final review in progress"
+    : "Paid - Preparing Shipment";
+  const mainCardTitle = isProcessing
+    ? "Processing Your Payment"
+    : "Thank You for Your Order";
+  const mainCardSubtitle = isProcessing
+    ? "Hang tight — your payment is going through a final review. This page will update automatically as soon as it clears."
+    : "Your payment was processed successfully.";
   const includedLabel = `${product.name}${summary.includedProductSuffix ? ` ${summary.includedProductSuffix}` : ""}`;
   const ctaClassName =
     "h-12 w-full rounded-lg border-0 bg-linear-to-b from-pay-cta-from to-pay-cta-to text-base font-extrabold tracking-[0.02em] text-pay-cta-foreground uppercase shadow-pay-cta transition-[transform,box-shadow,background-image] duration-200 hover:from-pay-cta-hover-from hover:to-pay-cta-hover-to hover:shadow-pay-cta-hover motion-safe:animate-pay-cta-pulse cursor-pointer";
@@ -80,21 +91,47 @@ export function ThankYouPage() {
           </SectionCard>
         ) : (
           <>
-            <section
-              data-section="promo-banner"
-              aria-label="Order confirmation message"
-              className="rounded-xl border border-[#cfe1d2] bg-[#f7fcf7] px-5 py-4"
-            >
-              <div data-slot="promo-copy" className="space-y-1">
-                <p className="text-base font-semibold text-[#173b28]">
-                  Order Confirmed
-                </p>
-                <p className="text-sm text-[#4a6351]">
-                  Your checkout is complete and your confirmation email is on the
-                  way.
-                </p>
-              </div>
-            </section>
+            {isProcessing ? (
+              <section
+                data-section="promo-banner"
+                data-status={state}
+                aria-label="Payment processing message"
+                aria-live="polite"
+                className="flex items-start gap-3 rounded-xl border border-[#e4d4a5] bg-[#fdf8ea] px-5 py-4"
+              >
+                <Spinner
+                  aria-hidden="true"
+                  className="mt-0.5 size-5 shrink-0 text-[#8a6d1a]"
+                />
+                <div data-slot="promo-copy" className="space-y-1">
+                  <p className="text-base font-semibold text-[#4a3a0f]">
+                    Processing Payment
+                  </p>
+                  <p className="text-sm text-[#6a5a2a]">
+                    We've received your payment and it's going through a final
+                    review. No need to pay again — we'll confirm here as soon
+                    as it clears.
+                  </p>
+                </div>
+              </section>
+            ) : (
+              <section
+                data-section="promo-banner"
+                data-status="succeeded"
+                aria-label="Order confirmation message"
+                className="rounded-xl border border-[#cfe1d2] bg-[#f7fcf7] px-5 py-4"
+              >
+                <div data-slot="promo-copy" className="space-y-1">
+                  <p className="text-base font-semibold text-[#173b28]">
+                    Order Confirmed
+                  </p>
+                  <p className="text-sm text-[#4a6351]">
+                    Your checkout is complete and your confirmation email is on
+                    the way.
+                  </p>
+                </div>
+              </section>
+            )}
 
             <div
               data-section="thank-you-layout"
@@ -103,11 +140,12 @@ export function ThankYouPage() {
               <section data-region="thank-you-main" className="flex flex-col gap-4">
                 <SectionCard
                   section="thank-you-main-card"
-                  title="Thank You for Your Order"
+                  data-status={state}
+                  title={mainCardTitle}
                   titleClassName={cardTitleClassName}
                 >
                   <p className="text-sm text-muted-foreground">
-                    Your payment was processed successfully.
+                    {mainCardSubtitle}
                   </p>
 
                   <section className="mt-2 border-t border-border pt-4">
