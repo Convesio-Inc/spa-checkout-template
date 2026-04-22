@@ -17,7 +17,6 @@ export interface CheckoutTokenPayload extends JWTPayload {
   payment_id: string;
   customer_id: string;
   order_number: string;
-  polling_id: string;
   status: string;
 }
 

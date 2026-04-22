@@ -10,7 +10,7 @@
  *   2. If the decoded status is already terminal (Succeeded / Authorized →
  *      "succeeded", or anything else non-pending → "failed"), we're done.
  *   3. If the status is "Pending", poll `/poll-payment` every 5s with
- *      `{ payment_id, polling_id }` and map each response's status through
+ *      `{ payment_id }` and map each response's status through
  *      the same sets. Clears the interval on terminal status or unmount.
  *
  * Exposed state:
@@ -36,7 +36,6 @@ export interface CheckoutTokenPayload {
   payment_id: string;
   customer_id: string;
   order_number: string;
-  polling_id: string;
   status: string;
 }
 
@@ -101,7 +100,6 @@ export function useThankYouPayment(
           },
           body: JSON.stringify({
             payment_id: current.payment_id,
-            polling_id: current.polling_id,
           }),
         });
       } catch (err) {
@@ -192,7 +190,6 @@ export function useThankYouPayment(
         payment_id: body.payment_id,
         customer_id: body.customer_id,
         order_number: body.order_number,
-        polling_id: body.polling_id,
         status: body.status,
       };
       payloadRef.current = decoded;

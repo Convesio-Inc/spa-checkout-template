@@ -30,7 +30,7 @@ React 19 + TypeScript SPA (Vite) deployed as a **Cloudflare Worker** (`@cloudfla
 3. User fills customer + shipping fields; form state lives in `CheckoutPage`.
 4. Submit → `component.createToken()` tokenizes the card → `useCheckoutPayment.pay()` POSTs to `POST /payments`.
 5. Worker validates the payload, injects `CPAY_SECRET` / `CPAY_INTEGRATION`, and proxies to ConvesioPay (sandbox or live based on `CPAY_ENVIRONMENT`).
-6. On `Succeeded` / `Authorized` / `Pending`, the worker **signs an HS256 JWT** (`worker/jwt.ts`, keyed on `CPAY_CLIENT_KEY`) carrying `{ payment_id, customer_id, order_number, polling_id, status }` and returns a `redirectUrl` of `/thank-you?token=<jwt>`. On any other status / error, it passes the upstream response straight through.
+6. On `Succeeded` / `Authorized` / `Pending`, the worker **signs an HS256 JWT** (`worker/jwt.ts`, keyed on `CPAY_CLIENT_KEY`) carrying `{ payment_id, customer_id, order_number, status }` and returns a `redirectUrl` of `/thank-you?token=<jwt>`. On any other status / error, it passes the upstream response straight through.
 7. `useCheckoutPayment.pay()` keeps the processing dialog up and `window.location.assign()`s to the redirect URL. `PaymentStatusDialog` is now only surfaced for `processing` and `failed` — success / pending are owned by the thank-you page.
 8. `ThankYouPage` + `useThankYouPayment` call `POST /verify-token` on mount, then, if the status is `Pending`, poll `POST /poll-payment` every 5s until the upstream status flips to terminal. Layout swaps between `verifying` / `pending` / `succeeded` / `failed` without a full re-layout.
 

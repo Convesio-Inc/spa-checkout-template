@@ -259,7 +259,6 @@ async function handlePayments(
         payment_id: parsed.id ?? '',
         customer_id: parsed.customerId ?? parsed.customer?.id ?? '',
         order_number: parsed.orderNumber ?? payload.orderNumber,
-        polling_id: '',
         status: upstreamStatus,
       },
       clientKey,
@@ -311,7 +310,6 @@ async function handleVerifyToken(
       payment_id: payload.payment_id,
       customer_id: payload.customer_id,
       order_number: payload.order_number,
-      polling_id: payload.polling_id,
       status: payload.status,
     });
   } catch (err) {
@@ -329,9 +327,6 @@ async function handleVerifyToken(
 
 interface PollPaymentBody {
   payment_id?: string;
-  // `polling_id` is threaded through so the future polling endpoint can swap
-  // this handler out without touching the client. Unused for now.
-  polling_id?: string;
 }
 
 async function handlePollPayment(
