@@ -350,7 +350,7 @@ export const checkoutContent: CheckoutContent = {
   },
 
   footer: {
-    primaryLine: "Copyright 2026 CheckoutVibes. All rights reserved.",
+    primaryLine: "All rights reserved.",
     secondaryLine: "Secure checkout powered by ConvesioPay.",
   },
 

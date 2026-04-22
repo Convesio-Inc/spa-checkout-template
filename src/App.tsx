@@ -8,15 +8,19 @@ import { SiteFooter } from "@/components/site";
 function App() {
   return (
     <>
-      <SiteHeader />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<CheckoutPage />} />
-          <Route path="/product" element={<ProductPage />} />
-          <Route path="/thank-you" element={<ThankYouPage />} />
-        </Routes>
-      </BrowserRouter>
-      <SiteFooter />
+      <main className="min-h-dvh flex flex-col">
+        <SiteHeader />
+        <div className="flex-1">
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<CheckoutPage />} />
+              <Route path="/product" element={<ProductPage />} />
+              <Route path="/thank-you" element={<ThankYouPage />} />
+            </Routes>
+          </BrowserRouter>
+        </div>
+        <SiteFooter />
+      </main>
     </>
   );
 }

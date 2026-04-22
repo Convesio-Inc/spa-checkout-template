@@ -26,13 +26,13 @@
  */
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { PriceRow } from "@/components/checkout/primitives/PriceRow";
 import type {
   ProductConfig,
   SummaryConfig,
 } from "@/content/config";
+import { SectionCard } from "./primitives/SectionCard";
 
 export interface OrderSummaryCardProps {
   copy: SummaryConfig;
@@ -53,84 +53,73 @@ export function OrderSummaryCard({
   const includedLabel = `${product.name}${copy.includedProductSuffix ? ` ${copy.includedProductSuffix}` : ""}`;
 
   return (
-    <Card data-section="order-summary">
-      <CardHeader>
-        <CardTitle
-          data-slot="summary-title"
-          className="text-xl font-bold tracking-tight"
-        >
-          {copy.title}
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent className="flex flex-col gap-3">
+    <SectionCard section="order-summary" title={copy.title}>
+      <div
+        data-slot="included-products-list"
+        className="rounded-[10px] border border-border bg-[#fafcf8] p-2.5"
+      >
         <div
-          data-slot="included-products-list"
-          className="rounded-[10px] border border-border bg-[#fafcf8] p-2.5"
+          data-slot="included-product-item"
+          className="my-[7px] flex items-center gap-2.5 text-sm"
         >
-          <div
-            data-slot="included-product-item"
-            className="my-[7px] flex items-center gap-2.5 text-sm"
-          >
-            <img
-              data-slot="included-product-thumb"
-              src={product.image.src}
-              alt={product.image.alt}
-              className="h-12 w-12 shrink-0 rounded-lg border border-[#d6e2d0] object-cover"
-            />
-            <span className="flex-1 text-foreground">{includedLabel}</span>
-            <strong data-slot="included-product-price" className="text-foreground">
-              {product.salePrice}
-            </strong>
-          </div>
+          <img
+            data-slot="included-product-thumb"
+            src={product.image.src}
+            alt={product.image.alt}
+            className="h-12 w-12 shrink-0 rounded-lg border border-[#d6e2d0] object-cover"
+          />
+          <span className="flex-1 text-foreground">{includedLabel}</span>
+          <strong data-slot="included-product-price" className="text-foreground">
+            {product.salePrice}
+          </strong>
         </div>
-        <div
-          data-slot="included-products-title"
-          className="mt-1 text-sm font-bold text-[#1a3c2b]"
+      </div>
+      <div
+        data-slot="included-products-title"
+        className="mt-1 text-sm font-bold text-[#1a3c2b]"
+      >
+        {copy.includedProductsTitle}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <PriceRow
+          data-slot="product-line"
+          line={{
+            id: "product",
+            label: product.name,
+            value: product.salePrice,
+          }}
+          className="my-2 text-[15px]"
+          valueClassName="font-bold"
+        />
+        <PriceRow data-slot="shipping-line" line={copy.shipping} className="my-2 text-[15px]" />
+        <PriceRow data-slot="tax-line" line={copy.tax} className="my-2 text-[15px]" />
+        <PriceRow
+          data-slot="total-line"
+          line={copy.total}
+          className="mt-3 border-t border-border pt-3 text-[22px]"
+          labelClassName="font-bold text-[#122f22]"
+          valueClassName="text-[22px] font-bold text-[#122f22]"
+        />
+        <Button
+          data-slot="cta-primary"
+          type="submit"
+          size="lg"
+          disabled={disabled}
+          aria-disabled={disabled}
+          className="h-12 w-full rounded-lg border-0 bg-linear-to-b from-pay-cta-from to-pay-cta-to text-base font-extrabold tracking-[0.02em] text-pay-cta-foreground uppercase shadow-pay-cta transition-[transform,box-shadow,background-image] duration-200 hover:from-pay-cta-hover-from hover:to-pay-cta-hover-to hover:shadow-pay-cta-hover motion-safe:animate-pay-cta-pulse cursor-pointer"
         >
-          {copy.includedProductsTitle}
-        </div>
+          {payLoading && <Spinner data-icon="inline-start" />}
+          {copy.ctaLabel}
+        </Button>
 
-        <div className="flex flex-col gap-2">
-          <PriceRow
-            data-slot="product-line"
-            line={{
-              id: "product",
-              label: product.name,
-              value: product.salePrice,
-            }}
-            className="my-2 text-[15px]"
-            valueClassName="font-bold"
-          />
-          <PriceRow data-slot="shipping-line" line={copy.shipping} className="my-2 text-[15px]" />
-          <PriceRow data-slot="tax-line" line={copy.tax} className="my-2 text-[15px]" />
-          <PriceRow
-            data-slot="total-line"
-            line={copy.total}
-            className="mt-3 border-t border-border pt-3 text-[22px]"
-            labelClassName="font-bold text-[#122f22]"
-            valueClassName="text-[22px] font-bold text-[#122f22]"
-          />
-          <Button
-            data-slot="cta-primary"
-            type="submit"
-            size="lg"
-            disabled={disabled}
-            aria-disabled={disabled}
-            className="h-12 w-full rounded-lg border-0 bg-linear-to-b from-pay-cta-from to-pay-cta-to text-base font-extrabold tracking-[0.02em] text-pay-cta-foreground uppercase shadow-pay-cta transition-[transform,box-shadow,background-image] duration-200 hover:from-pay-cta-hover-from hover:to-pay-cta-hover-to hover:shadow-pay-cta-hover motion-safe:animate-pay-cta-pulse cursor-pointer"
-          >
-            {payLoading && <Spinner data-icon="inline-start" />}
-            {copy.ctaLabel}
-          </Button>
-
-          <p
-            data-slot="cta-footnote"
-            className="text-xs leading-relaxed text-muted-foreground"
-          >
-            {copy.ctaFootnote}
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+        <p
+          data-slot="cta-footnote"
+          className="text-xs leading-relaxed text-muted-foreground"
+        >
+          {copy.ctaFootnote}
+        </p>
+      </div>
+    </SectionCard>
   );
 }
