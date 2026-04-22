@@ -22,7 +22,7 @@ Built with **React 19**, **TypeScript**, **Vite**, **Tailwind CSS v4** and **sha
   - [Environment Variables](#environment-variables)
   - [Testing the Checkout](#testing-the-checkout)
   - [Customization](#customization)
-    - [1. Copy, prices and images — `src/content/checkout.ts`](#1-copy-prices-and-images--srccontentcheckoutts)
+    - [1. Copy, prices and images — `src/content/config.ts`](#1-copy-prices-and-images--srccontentconfigts)
     - [2. Brand colors — `src/index.css`](#2-brand-colors--srcindexcss)
     - [3. Layout and behavior — section components](#3-layout-and-behavior--section-components)
   - [Local Development](#local-development)
@@ -159,7 +159,7 @@ A successful transaction should land the user on the Thank You page. Failed / pe
 
 The template is designed to be re-skinned in three layers of increasing depth. **Start from layer 1 and only go deeper if you need to.**
 
-### 1. Copy, prices and images — `src/content/checkout.ts`
+### 1. Copy, prices and images — `src/content/config.ts`
 
 This is the **single source of truth** for every user-visible string, price and image on the checkout page (and related pages). Change values here without touching any JSX.
 
@@ -171,7 +171,7 @@ Includes:
 - Order summary and Pay Now CTA
 - Footer copy
 
-Replace the placeholder product and brand images in the `public/` folder and reference them from `checkout.ts`.
+Replace the placeholder product and brand images in the `public/` folder and reference them from `config.ts`.
 
 ### 2. Brand colors — `src/index.css`
 
@@ -197,7 +197,7 @@ Each section of the checkout lives in its own component under `src/components/ch
 - `CheckoutFooter.tsx`
 - `PaymentStatusDialog.tsx`
 
-Compose or reorder them in `src/pages/CheckoutPage.tsx`. Each component starts with a JSDoc header listing its props and the `checkout.ts` path that feeds it.
+Compose or reorder them in `src/pages/CheckoutPage.tsx`. Each component starts with a JSDoc header listing its props and the `config.ts` path that feeds it.
 
 ---
 
@@ -262,7 +262,7 @@ npm run preview    # Builds + serves through Wrangler
 │   │   ├── thank-you/           Thank-you-page components
 │   │   └── ui/                  shadcn/ui primitives
 │   ├── content/
-│   │   └── checkout.ts          ★ Central config: copy, prices, images
+│   │   └── config.ts          ★ Central config: copy, prices, images
 │   ├── hooks/                   Checkout / payment / SDK hooks
 │   ├── lib/                     Utilities + ConvesioPay SDK singleton
 │   ├── pages/                   Route-level pages (Product, Checkout, ThankYou)
@@ -318,7 +318,7 @@ Verify `CPAY_SECRET`, `CPAY_API_KEY` and `CPAY_INTEGRATION` are set as Worker se
 **Payment succeeds in sandbox but fails in live.**
 Live integrations require their own distinct credentials — sandbox keys won't work against the live API. Double-check you've created a separate integration in the production console.
 
-**I changed `checkout.ts` but the page didn't update.**
+**I changed `config.ts` but the page didn't update.**
 Stop and restart the dev server. Vite usually hot-reloads, but changes to types can occasionally require a clean restart.
 
 ---

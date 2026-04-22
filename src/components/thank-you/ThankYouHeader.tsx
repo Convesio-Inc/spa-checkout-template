@@ -27,7 +27,7 @@ import { CheckCircle2Icon } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import type { BrandConfig } from "@/content/checkout";
+import type { BrandConfig } from "@/content/config";
 
 export type ThankYouHeaderStatus = "verifying" | "pending" | "succeeded";
 

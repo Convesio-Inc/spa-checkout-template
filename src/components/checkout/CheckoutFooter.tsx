@@ -22,7 +22,7 @@
  */
 
 import { SecureBadge } from "@/components/checkout/primitives/SecureBadge";
-import type { FooterCopy, SecurityCopy } from "@/content/checkout";
+import type { FooterCopy, SecurityCopy } from "@/content/config";
 
 export interface CheckoutFooterProps {
   brandName: string;

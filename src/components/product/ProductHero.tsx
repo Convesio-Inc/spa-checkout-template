@@ -28,7 +28,7 @@ import { CheckIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { BrandConfig, ProductConfig, ProductPageCopy } from "@/content/checkout";
+import type { BrandConfig, ProductConfig, ProductPageCopy } from "@/content/config";
 
 export interface ProductHeroProps {
   brand: BrandConfig;

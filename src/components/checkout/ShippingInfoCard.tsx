@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
-import type { ShippingFormCopy } from "@/content/checkout";
+import type { ShippingFormCopy } from "@/content/config";
 
 export interface ShippingInfoValue {
   fullName: string;

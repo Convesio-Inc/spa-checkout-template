@@ -17,7 +17,7 @@ import { MailIcon, PackageIcon, TruckIcon } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
-import type { ThankYouStep } from "@/content/checkout";
+import type { ThankYouStep } from "@/content/config";
 
 const STEP_ICONS: Record<string, LucideIcon> = {
   email: MailIcon,

@@ -24,7 +24,7 @@
 import { useEffect, useState } from "react";
 import { ClockIcon } from "lucide-react";
 
-import type { TimerConfig } from "@/content/checkout";
+import type { TimerConfig } from "@/content/config";
 
 export interface CheckoutTimerProps {
   timer: TimerConfig;

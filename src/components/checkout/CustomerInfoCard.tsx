@@ -18,7 +18,7 @@
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
-import type { CustomerFormCopy } from "@/content/checkout";
+import type { CustomerFormCopy } from "@/content/config";
 
 export interface CustomerInfoValue {
   email: string;

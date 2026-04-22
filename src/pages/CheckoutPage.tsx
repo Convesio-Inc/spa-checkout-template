@@ -16,7 +16,7 @@
  * Native HTML5 `required` attributes on every input stop the form from
  * submitting until the browser's built-in validation passes.
  *
- * All copy, images, and pricing come from `src/content/checkout.ts`.
+ * All copy, images, and pricing come from `src/content/config.ts`.
  * All colors come from the `BRAND THEME` block in `src/index.css`.
  *
  * Layout (top to bottom, all inside a single `max-w-5xl` content column):
@@ -48,7 +48,7 @@ import {
   ShippingInfoCard,
   type ShippingInfoValue,
 } from "@/components/checkout/ShippingInfoCard";
-import { checkoutContent } from "@/content/checkout";
+import { checkoutContent } from "@/content/config";
 import { useCheckoutPayment } from "@/hooks/useCheckoutPayment";
 
 const INITIAL_CUSTOMER: CustomerInfoValue = {

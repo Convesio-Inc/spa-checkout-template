@@ -22,7 +22,7 @@ import type {
   ProductConfig,
   SecurityCopy,
   SummaryConfig,
-} from "@/content/checkout";
+} from "@/content/config";
 
 export interface OrderConfirmationCardProps {
   title: string;

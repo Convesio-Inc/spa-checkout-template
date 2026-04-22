@@ -37,7 +37,7 @@ import type {
   ProductConfig,
   SecurityCopy,
   SummaryConfig,
-} from "@/content/checkout";
+} from "@/content/config";
 
 export interface OrderSummaryCardProps {
   copy: SummaryConfig;

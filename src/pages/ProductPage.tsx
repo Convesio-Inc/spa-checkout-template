@@ -6,7 +6,7 @@ import {
   ProductHero,
   ProductCopySection,
 } from "@/components/product";
-import { checkoutContent } from "@/content/checkout";
+import { checkoutContent } from "@/content/config";
 
 export function ProductPage() {
   const { brand, product, productPage, security, guarantee, footer } =

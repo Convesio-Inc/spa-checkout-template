@@ -12,7 +12,7 @@
  */
 
 import { Card, CardContent } from "@/components/ui/card";
-import type { BrandConfig } from "@/content/checkout";
+import type { BrandConfig } from "@/content/config";
 
 export interface ProductHeaderProps {
   brand: BrandConfig;

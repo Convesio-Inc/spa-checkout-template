@@ -21,7 +21,7 @@ import { useEffect, useRef } from "react";
 
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 import { useConvesioPayCheckout } from "@/hooks/useConvesioPayCheckout";
-import type { PaymentFormCopy } from "@/content/checkout";
+import type { PaymentFormCopy } from "@/content/config";
 
 export interface PaymentInfoCardProps {
   copy: PaymentFormCopy;

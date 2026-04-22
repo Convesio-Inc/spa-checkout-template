@@ -38,7 +38,7 @@ React 19 + TypeScript SPA (Vite) deployed as a **Cloudflare Worker** (`@cloudfla
 
 | File | Role |
 |---|---|
-| `src/content/checkout.ts` | **Start here for any copy/price/image change.** Typed config object; each section has its own interface. |
+| `src/content/config.ts` | **Start here for any copy/price/image change.** Typed config object; each section has its own interface. |
 | `src/index.css` | `/* === BRAND THEME === */` block — three `--brand*` tokens drive button color, hover, and text. |
 | `src/App.tsx` | React Router 7 routes: `/` → `CheckoutPage`, `/product` → `ProductPage`, `/thank-you` → `ThankYouPage`. |
 | `src/pages/CheckoutPage.tsx` | Owns all form state; wires the two hooks together; drives `PaymentStatusDialog`. |
@@ -71,7 +71,7 @@ Declared in `wrangler.jsonc` (as `secrets.required`, so Wrangler fails the deplo
 
 Three layers in increasing depth — only go deeper than you need:
 
-1. **Copy / prices / images** → `src/content/checkout.ts` (no JSX changes needed)
+1. **Copy / prices / images** → `src/content/config.ts` (no JSX changes needed)
 2. **Brand colors** → `/* === BRAND THEME === */` block in `src/index.css`
 3. **Layout or behaviour** → section components under `src/components/checkout/`, `src/components/product/`, `src/components/thank-you/`; compose or reorder them in the matching page under `src/pages/`.
 
@@ -81,7 +81,7 @@ Section components live in three families:
 - `src/components/product/` — `ProductHeader`, `ProductHero`, `ProductCopySection`.
 - `src/components/thank-you/` — `ThankYouHeader`, `OrderConfirmationCard`, `NextStepsCard`.
 
-Each section component starts with a JSDoc header listing its props and the `checkout.ts` path that feeds it.
+Each section component starts with a JSDoc header listing its props and the `config.ts` path that feeds it.
 
 ## Semantic markers (preserve when editing)
 

@@ -34,7 +34,7 @@ import {
   ThankYouHeader,
 } from "@/components/thank-you";
 import { Button } from "@/components/ui/button";
-import { checkoutContent } from "@/content/checkout";
+import { checkoutContent } from "@/content/config";
 import { useThankYouPayment } from "@/hooks/useThankYouPayment";
 
 export function ThankYouPage() {
