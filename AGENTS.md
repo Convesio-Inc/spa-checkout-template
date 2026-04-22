@@ -29,10 +29,10 @@ React 19 + TypeScript SPA (Vite) deployed as a **Cloudflare Worker** (`@cloudfla
 2. Hook initializes the ConvesioPay SDK (injected via `<script>` in `index.html`) and mounts its iframe into a ref.
 3. User fills customer + shipping fields; form state lives in `CheckoutPage`.
 4. Submit → `component.createToken()` tokenizes the card → `useCheckoutPayment.pay()` POSTs to `POST /payments`.
-5. Worker validates the payload, injects `CPAY_SECRET` / `CPAY_INTEGRATION`, and proxies to ConvesioPay (sandbox or live based on `CPAY_ENVIRONMENT`).
-6. On `Succeeded` / `Authorized` / `Pending`, the worker **signs an HS256 JWT** (`worker/jwt.ts`, keyed on `CPAY_CLIENT_KEY`) carrying `{ payment_id, customer_id, order_number, status }` and returns a `redirectUrl` of `/thank-you?token=<jwt>`. On any other status / error, it passes the upstream response straight through.
-7. `useCheckoutPayment.pay()` keeps the processing dialog up and `window.location.assign()`s to the redirect URL. `PaymentStatusDialog` is now only surfaced for `processing` and `failed` — success / pending are owned by the thank-you page.
-8. `ThankYouPage` + `useThankYouPayment` call `POST /verify-token` on mount, then, if the status is `Pending`, poll `POST /poll-payment` every 5s until the upstream status flips to terminal. Layout swaps between `verifying` / `pending` / `succeeded` / `failed` without a full re-layout.
+5. Worker validates the payload, **pre-signs a "marker" JWT** (no `payment_id` — we don't have one yet) and bakes it into the outgoing `returnUrl` as `/thank-you?token=<marker>`. It then injects `CPAY_SECRET` / `CPAY_INTEGRATION` and proxies to ConvesioPay (sandbox or live based on `CPAY_ENVIRONMENT`).
+6. On `Succeeded` / `Authorized` / `Pending`, the worker **signs a second HS256 JWT** (`worker/jwt.ts`, keyed on `CPAY_CLIENT_KEY`) carrying `{ payment_id, customer_id, order_number, status }` and returns a `redirectUrl` of `/thank-you?token=<jwt>`. If the upstream response carries `actionRequired` (a 3DS / verify-customer challenge), the worker passes the body through untouched — the SPA handles the handoff itself, and the bank will later redirect the user back to the `returnUrl` containing the marker JWT. On any other status / error, it passes the upstream response straight through.
+7. `useCheckoutPayment.pay()` keeps the processing dialog up and `window.location.assign()`s to the redirect URL. `PaymentStatusDialog` is now only surfaced for `processing` and `failed` — success / pending are owned by the thank-you page. On an `actionRequired` response, the hook stashes `{ payment_id, order_number }` in `sessionStorage[cpay_pending_payment]` before navigating the user to `actionRequired.redirectUrl`.
+8. `ThankYouPage` + `useThankYouPayment` call `POST /verify-token` on mount, then, if the status is `Pending`, poll `POST /poll-payment` every 5s until the upstream status flips to terminal. Layout swaps between `verifying` / `pending` / `succeeded` / `failed` without a full re-layout. If the decoded JWT has an empty `payment_id` (the marker signed in step 5), the hook resolves the id from the `?paymentId=` URL param or the sessionStorage bridge, POSTs it to `/issue-token` to mint a proper JWT, then `history.replaceState`s the URL to `/thank-you?token=<jwt>` before running the normal verify + poll loop.
 
 ### Key files
 
@@ -45,10 +45,10 @@ React 19 + TypeScript SPA (Vite) deployed as a **Cloudflare Worker** (`@cloudfla
 | `src/pages/ThankYouPage.tsx` | Post-checkout landing page driven by the `?token=` JWT; renders verifying / pending / succeeded / failed. |
 | `src/pages/ProductPage.tsx` | Optional product page mounted at `/product`. |
 | `src/hooks/useConvesioPayCheckout.ts` | Config fetch → SDK init → iframe mount lifecycle; returns `{ component, isValid, status }`. |
-| `src/hooks/useCheckoutPayment.ts` | State machine: `idle → processing → success / pending / failed`. On success/pending the hook hands off to the worker's `redirectUrl` instead of surfacing a modal. |
-| `src/hooks/useThankYouPayment.ts` | Thank-you state machine: verify JWT → poll `/poll-payment` every 5s while pending → resolve to succeeded/failed. |
+| `src/hooks/useCheckoutPayment.ts` | State machine: `idle → processing → success / pending / failed`. On success/pending the hook hands off to the worker's `redirectUrl` instead of surfacing a modal. On 3DS `actionRequired`, stashes the payment id in sessionStorage and redirects to the challenge URL. Also exports `PENDING_PAYMENT_SESSION_KEY` / `PENDING_PAYMENT_MAX_AGE_MS`. |
+| `src/hooks/useThankYouPayment.ts` | Thank-you state machine: verify JWT → poll `/poll-payment` every 5s while pending → resolve to succeeded/failed. When loaded without a `?token=`, hydrates one via `/issue-token` from a `?paymentId=` query param or the sessionStorage bridge set by the checkout hook. |
 | `src/lib/convesiopay.ts` | Module-level singletons: cached config promise + single SDK instance (never re-initialized). |
-| `worker/index.ts` | Worker entry: `/config`, `/payments`, `/verify-token`, `/poll-payment` routes. Upstream host chosen by `CPAY_ENVIRONMENT`. |
+| `worker/index.ts` | Worker entry: `/config`, `/payments`, `/verify-token`, `/issue-token`, `/poll-payment` routes. Upstream host chosen by `CPAY_ENVIRONMENT`. |
 | `worker/jwt.ts` | HS256 `signCheckoutToken` / `verifyCheckoutToken` helpers for the thank-you redirect token. |
 
 ### Worker routes
@@ -56,8 +56,9 @@ React 19 + TypeScript SPA (Vite) deployed as a **Cloudflare Worker** (`@cloudfla
 | Method | Path | Purpose |
 |---|---|---|
 | `GET` | `/config` | Returns `{ apiKey, clientKey, environment }` to boot the browser SDK. |
-| `POST` | `/payments` | Proxies to ConvesioPay's payments API. On success/pending, signs a JWT and injects `redirectUrl: /thank-you?token=<jwt>`. |
+| `POST` | `/payments` | Proxies to ConvesioPay's payments API. Pre-signs a marker JWT into the outgoing `returnUrl` so 3DS returns land on `/thank-you?token=<marker>`. On success/pending, signs a proper JWT and injects `redirectUrl: /thank-you?token=<jwt>`. On `actionRequired` (3DS), passes the body through for the SPA to handle the challenge handoff. |
 | `POST` | `/verify-token` | Verifies a thank-you redirect JWT and returns its decoded payload. |
+| `POST` | `/issue-token` | Mints a fresh thank-you JWT for a `payment_id` (verified to exist upstream). Used by the thank-you page to recover from a 3DS return when no `?token=` is present. |
 | `POST` | `/poll-payment` | Proxies `GET /v1/payments/:id` upstream so the thank-you page can poll a pending payment. |
 
 ### Worker secrets

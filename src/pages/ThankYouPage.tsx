@@ -43,7 +43,15 @@ export function ThankYouPage() {
 
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
-  const { state, payload, error } = useThankYouPayment(token);
+  // ConvesioPay may append `?paymentId=` to the return URL after a 3DS
+  // challenge. If it does, we use it to mint a thank-you JWT via
+  // `/issue-token`; if not, the hook falls back to the sessionStorage entry
+  // that `useCheckoutPayment` wrote before the handoff.
+  const paymentIdHint = searchParams.get("paymentId");
+  const { state, payload, error } = useThankYouPayment({
+    token,
+    paymentIdHint,
+  });
 
   const isFailed = state === "failed";
   const isProcessing = state === "pending" || state === "verifying";

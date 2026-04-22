@@ -7,12 +7,28 @@
  *                         browser SDK needs to boot the checkout component.
  *
  *   POST /payments      — server-side proxy to the ConvesioPay payments API.
- *                         On success/pending, signs a JWT with the payment
- *                         details and injects a `redirectUrl` pointing at
- *                         `/thank-you?token=<jwt>`.
+ *                         Pre-signs a "marker" JWT (no `payment_id`) and
+ *                         bakes it into the outgoing `returnUrl`, so that if
+ *                         the payment takes the 3DS branch the user comes
+ *                         back to `/thank-you?token=<marker>` and the resume
+ *                         flow is gated by a worker-signed token. On
+ *                         success/pending, signs a proper JWT with the
+ *                         payment details and injects a `redirectUrl`
+ *                         pointing at `/thank-you?token=<jwt>`. On an
+ *                         `actionRequired` (3DS) response, passes the body
+ *                         through untouched so the SPA can hand the user off
+ *                         to the challenge URL directly.
  *
  *   POST /verify-token  — verifies a thank-you redirect JWT and returns its
  *                         decoded payload. Used by the thank-you page on load.
+ *
+ *   POST /issue-token   — takes a `payment_id`, looks it up upstream to make
+ *                         sure it exists, and signs a fresh JWT from the
+ *                         resulting data. Used by the thank-you page after a
+ *                         3DS challenge: the SPA stashes the id in
+ *                         sessionStorage before redirecting the user to the
+ *                         bank, then calls this on return to hydrate a proper
+ *                         `?token=<jwt>` URL.
  *
  *   POST /poll-payment  — proxies `GET /v1/payments/:id` upstream so the
  *                         thank-you page can poll for the latest status of
@@ -92,12 +108,19 @@ const REQUIRED_FIELDS: Array<keyof PaymentRequestBody> = [
   'currency',
 ];
 
+interface UpstreamActionRequired {
+  type?: string;
+  redirectUrl?: string;
+  [key: string]: unknown;
+}
+
 interface UpstreamPaymentResponse {
   id?: string;
   orderNumber?: string;
   status?: string;
   customerId?: string;
   customer?: { id?: string };
+  actionRequired?: UpstreamActionRequired;
   error?: boolean;
   message?: string;
   [key: string]: unknown;
@@ -190,12 +213,54 @@ async function handlePayments(
   if (clientKey instanceof Response) return clientKey;
 
   const environment = resolveEnvironment(env);
+  const origin = new URL(request.url).origin;
+  const orderNumber = body.orderNumber ?? crypto.randomUUID();
+
+  // Pre-sign a "marker" JWT that we'll bake into the `returnUrl` we hand to
+  // ConvesioPay. If the payment takes the 3DS branch, the bank will send
+  // the user back to this exact URL — so the thank-you page will receive
+  // the marker verbatim and can use its presence as proof that the user
+  // really came through our checkout (rather than e.g. browsing directly
+  // to `/thank-you`).
+  //
+  // The marker intentionally carries no `payment_id` — we don't have one
+  // yet at this point in the flow. The thank-you page uses the empty
+  // `payment_id` as the signal to fall through to its resume path, which
+  // reads the id from sessionStorage (or a ConvesioPay-appended
+  // `?paymentId=`) and exchanges it for a real thank-you token via
+  // `/issue-token`.
+  let returnMarkerToken: string;
+  try {
+    returnMarkerToken = await signCheckoutToken(
+      {
+        payment_id: '',
+        customer_id: '',
+        order_number: orderNumber,
+        status: 'AwaitingAction',
+      },
+      clientKey,
+    );
+  } catch (err) {
+    return json(
+      {
+        error: true,
+        message: `Failed to sign return marker token: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      },
+      { status: 500 },
+    );
+  }
+
+  const defaultReturnUrl = `${origin}/thank-you?token=${encodeURIComponent(
+    returnMarkerToken,
+  )}`;
 
   const payload = {
     ...body,
     integration: env.CPAY_INTEGRATION,
-    returnUrl: body.returnUrl ?? new URL('/', request.url).toString(),
-    orderNumber: body.orderNumber ?? crypto.randomUUID(),
+    returnUrl: body.returnUrl ?? defaultReturnUrl,
+    orderNumber,
   };
 
   let upstream: Response;
@@ -232,6 +297,23 @@ async function handlePayments(
   // failed-state handling uses `error` / `message` / non-2xx identically.
   const upstreamOk = upstream.ok && !parsed?.error;
   const upstreamStatus = parsed?.status;
+
+  // ConvesioPay flagged the payment for a 3DS (or similar) challenge. We pass
+  // the body through untouched — the SPA navigates the user to
+  // `actionRequired.redirectUrl`, and on return hits `/issue-token` to mint
+  // a thank-you JWT from the payment id it stashed in sessionStorage. Do this
+  // before the terminal-ok check so a `Pending`+`actionRequired` response
+  // doesn't accidentally short-circuit into the signed-redirect branch.
+  if (upstreamOk && parsed?.actionRequired?.redirectUrl) {
+    return new Response(text, {
+      status: upstream.status,
+      headers: {
+        'Content-Type': upstream.headers.get('Content-Type') ?? 'application/json',
+        'Cache-Control': 'no-store',
+      },
+    });
+  }
+
   const isTerminalOk =
     upstreamOk &&
     !!upstreamStatus &&
@@ -275,7 +357,6 @@ async function handlePayments(
     );
   }
 
-  const origin = new URL(request.url).origin;
   const redirectUrl = `${origin}/thank-you?token=${encodeURIComponent(token)}`;
 
   return json(
@@ -323,6 +404,127 @@ async function handleVerifyToken(
       { status: 400 },
     );
   }
+}
+
+interface IssueTokenBody {
+  payment_id?: string;
+}
+
+/**
+ * Mint a thank-you JWT for a previously-created payment.
+ *
+ * Used by the thank-you page after a 3DS challenge: on the initial
+ * `/payments` call, the SPA stashed the payment id in sessionStorage and
+ * redirected the user to the bank's `verify-customer` page. When the bank
+ * redirects the user back to `/thank-you`, the SPA reads the id back out and
+ * calls this endpoint to get a token it can feed into the normal verify +
+ * poll flow.
+ *
+ * Authorization: we trust the caller's claim to the `payment_id` only to the
+ * extent that the upstream API confirms the payment exists. The tokens minted
+ * here are functionally equivalent to what `/poll-payment` already exposes
+ * (payment status, which the id-holder could query directly), so this is not
+ * a privilege upgrade — just a way to normalize the URL back to the canonical
+ * `?token=<jwt>` shape that the rest of the thank-you flow expects.
+ */
+async function handleIssueToken(
+  request: Request,
+  env: Env,
+): Promise<Response> {
+  const body = await readJson<IssueTokenBody>(request);
+  const paymentId = body?.payment_id?.trim();
+  if (!paymentId) {
+    return json(
+      { error: true, message: 'Missing `payment_id` in request body.' },
+      { status: 400 },
+    );
+  }
+
+  const secret = requireSecret(env);
+  if (secret instanceof Response) return secret;
+
+  const clientKey = requireClientKey(env);
+  if (clientKey instanceof Response) return clientKey;
+
+  const environment = resolveEnvironment(env);
+
+  let upstream: Response;
+  try {
+    upstream = await fetch(singlePaymentEndpoint(environment, paymentId), {
+      method: 'GET',
+      headers: {
+        Authorization: secret,
+        Accept: 'application/json',
+      },
+    });
+  } catch (err) {
+    return json(
+      {
+        error: true,
+        message: `Upstream payment lookup failed: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      },
+      { status: 502 },
+    );
+  }
+
+  const text = await upstream.text();
+  let parsed: UpstreamPaymentResponse | null = null;
+  try {
+    parsed = text ? (JSON.parse(text) as UpstreamPaymentResponse) : null;
+  } catch {
+    parsed = null;
+  }
+
+  if (!upstream.ok || !parsed || parsed.error) {
+    return json(
+      {
+        error: true,
+        message:
+          parsed?.message ??
+          `Payment not found (${upstream.status} ${upstream.statusText})`,
+      },
+      { status: upstream.status === 200 ? 404 : upstream.status },
+    );
+  }
+
+  let token: string;
+  try {
+    // Right after a 3DS challenge, upstream frequently still reports a
+    // transitional status ("AwaitingAction", "AuthenticationPending", etc.)
+    // until the webhook settles the payment. We only preserve the status
+    // when it's a known terminal success — for everything else we write
+    // "Pending" so the thank-you page starts polling instead of classifying
+    // the in-between status as a failure. The client's immediate first poll
+    // then fetches the authoritative status, so a payment that's genuinely
+    // already terminal only costs one extra round trip.
+    const statusForToken =
+      parsed.status && SUCCESS_STATUSES.has(parsed.status)
+        ? parsed.status
+        : 'Pending';
+    token = await signCheckoutToken(
+      {
+        payment_id: parsed.id ?? paymentId,
+        customer_id: parsed.customerId ?? parsed.customer?.id ?? '',
+        order_number: parsed.orderNumber ?? '',
+        status: statusForToken,
+      },
+      clientKey,
+    );
+  } catch (err) {
+    return json(
+      {
+        error: true,
+        message: `Failed to sign redirect token: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      },
+      { status: 500 },
+    );
+  }
+
+  return json({ token });
 }
 
 interface PollPaymentBody {
@@ -392,6 +594,10 @@ export default {
 
     if (url.pathname === '/verify-token' && request.method === 'POST') {
       return handleVerifyToken(request, env);
+    }
+
+    if (url.pathname === '/issue-token' && request.method === 'POST') {
+      return handleIssueToken(request, env);
     }
 
     if (url.pathname === '/poll-payment' && request.method === 'POST') {
