@@ -1,6 +1,4 @@
 import { GuaranteeBadge } from "@/components/checkout/primitives/GuaranteeBadge";
-import { SecureBadge } from "@/components/checkout/primitives/SecureBadge";
-import { CheckoutFooter } from "@/components/checkout/CheckoutFooter";
 import {
   ProductHeader,
   ProductHero,
@@ -9,7 +7,7 @@ import {
 import { checkoutContent } from "@/content/checkout";
 
 export function ProductPage() {
-  const { brand, product, productPage, security, guarantee, footer } =
+  const { brand, product, productPage, guarantee } =
     checkoutContent;
 
   return (
@@ -22,14 +20,6 @@ export function ProductPage() {
 
         {/* #region SECTION: Product Hero */}
         <ProductHero brand={brand} product={product} copy={productPage} />
-        {/* #endregion */}
-
-        {/* #region SECTION: Secure notice */}
-        <SecureBadge
-          data-section="secure-notice"
-          label={security.label}
-          className="self-center"
-        />
         {/* #endregion */}
 
         {/* #region SECTION: Product Copy */}
@@ -47,12 +37,6 @@ export function ProductPage() {
           description={guarantee.description}
         />
         {/* #endregion */}
-
-        <CheckoutFooter
-          brandName={brand.name}
-          copy={footer}
-          security={security}
-        />
 
       </div>
     </main>

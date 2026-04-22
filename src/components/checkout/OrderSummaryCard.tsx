@@ -27,23 +27,16 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import { GuaranteeBadge } from "@/components/checkout/primitives/GuaranteeBadge";
 import { PriceRow } from "@/components/checkout/primitives/PriceRow";
-import { SecureBadge } from "@/components/checkout/primitives/SecureBadge";
 import type {
-  GuaranteeCopy,
   ProductConfig,
-  SecurityCopy,
   SummaryConfig,
 } from "@/content/checkout";
 
 export interface OrderSummaryCardProps {
   copy: SummaryConfig;
   product: ProductConfig;
-  security: SecurityCopy;
-  guarantee: GuaranteeCopy;
   /** When true the Pay Now button is non-interactive. Defaults to false. */
   payDisabled?: boolean;
   /** When true the button shows a spinner and stays disabled. */
@@ -53,12 +46,11 @@ export interface OrderSummaryCardProps {
 export function OrderSummaryCard({
   copy,
   product,
-  security,
-  guarantee,
   payDisabled = false,
   payLoading = false,
 }: OrderSummaryCardProps) {
   const disabled = payDisabled || payLoading;
+  const includedLabel = `${product.name}${copy.includedProductSuffix ? ` ${copy.includedProductSuffix}` : ""}`;
 
   return (
     <Card data-section="order-summary">
@@ -72,38 +64,54 @@ export function OrderSummaryCard({
       </CardHeader>
 
       <CardContent className="flex flex-col gap-3">
-        <div data-slot="product-block" className="flex flex-col gap-3">
-          <img
-            data-slot="product-image"
-            src={product.image.src}
-            alt={product.image.alt}
-            className="w-full rounded-lg border border-border object-cover"
-          />
+        <div
+          data-slot="included-products-title"
+          className="mt-1 text-sm font-bold text-[#1a3c2b]"
+        >
+          {copy.includedProductsTitle}
+        </div>
+        <div
+          data-slot="included-products-list"
+          className="rounded-[10px] border border-border bg-[#fafcf8] p-2.5"
+        >
+          <div
+            data-slot="included-product-item"
+            className="my-[7px] flex items-center gap-2.5 text-sm"
+          >
+            <img
+              data-slot="included-product-thumb"
+              src={product.image.src}
+              alt={product.image.alt}
+              className="h-12 w-12 shrink-0 rounded-lg border border-[#d6e2d0] object-cover"
+            />
+            <span className="flex-1 text-foreground">{includedLabel}</span>
+            <strong data-slot="included-product-price" className="text-foreground">
+              {product.salePrice}
+            </strong>
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">
           <PriceRow
             data-slot="product-line"
-            href="/product"
             line={{
               id: "product",
               label: product.name,
               value: product.salePrice,
             }}
-            regularValue={product.regularPrice}
+            className="my-2 text-[15px]"
+            valueClassName="font-bold"
           />
-          <PriceRow data-slot="shipping-line" line={copy.shipping} />
-          <PriceRow data-slot="tax-line" line={copy.tax} />
+          <PriceRow data-slot="shipping-line" line={copy.shipping} className="my-2 text-[15px]" />
+          <PriceRow data-slot="tax-line" line={copy.tax} className="my-2 text-[15px]" />
+          <PriceRow
+            data-slot="total-line"
+            line={copy.total}
+            className="mt-3 border-t border-border pt-3 text-[22px]"
+            labelClassName="font-bold text-[#122f22]"
+            valueClassName="text-[22px] font-bold text-[#122f22]"
+          />
         </div>
-
-        <Separator />
-
-        <PriceRow
-          data-slot="total-line"
-          line={copy.total}
-          labelClassName="text-base font-bold text-foreground"
-          valueClassName="text-base font-bold text-foreground"
-        />
       </CardContent>
 
       <CardFooter className="flex-col items-start gap-3">
@@ -113,13 +121,11 @@ export function OrderSummaryCard({
           size="lg"
           disabled={disabled}
           aria-disabled={disabled}
-          className="h-12 w-full rounded-lg bg-brand text-base font-semibold text-brand-foreground hover:bg-brand-accent"
+          className="h-12 w-full rounded-lg border-0 bg-linear-to-b from-pay-cta-from to-pay-cta-to text-base font-extrabold tracking-[0.02em] text-pay-cta-foreground uppercase shadow-pay-cta transition-[transform,box-shadow,background-image] duration-200 hover:-translate-y-px hover:from-pay-cta-hover-from hover:to-pay-cta-hover-to hover:shadow-pay-cta-hover motion-safe:animate-pay-cta-pulse"
         >
           {payLoading && <Spinner data-icon="inline-start" />}
           {copy.ctaLabel}
         </Button>
-
-        <SecureBadge label={security.label} className="self-center" />
 
         <p
           data-slot="cta-footnote"
@@ -127,13 +133,6 @@ export function OrderSummaryCard({
         >
           {copy.ctaFootnote}
         </p>
-
-        <GuaranteeBadge
-          days={guarantee.days}
-          daysLabel={guarantee.daysLabel}
-          title={guarantee.title}
-          description={guarantee.description}
-        />
       </CardFooter>
     </Card>
   );

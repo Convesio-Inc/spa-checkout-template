@@ -48,6 +48,18 @@ export interface ProductPageCopy {
   ctaLabel: string;
 }
 
+export interface HeaderCopy {
+  topBar: {
+    badge: string;
+    messages: [string, string];
+  };
+}
+
+export interface FormPanelCopy {
+  title: string;
+  subtitle: string;
+}
+
 export interface CustomerFormCopy {
   title: string;
   emailLabel: string;
@@ -92,6 +104,8 @@ export interface PaymentFormCopy {
   expiryPlaceholder: string;
   cvvLabel: string;
   cvvPlaceholder: string;
+  loadingMessage: string;
+  errorFallbackMessage: string;
 }
 
 export interface PriceLine {
@@ -102,6 +116,8 @@ export interface PriceLine {
 
 export interface SummaryConfig {
   title: string;
+  includedProductsTitle: string;
+  includedProductSuffix?: string;
   shipping: PriceLine;
   tax: PriceLine;
   total: PriceLine;
@@ -122,12 +138,17 @@ export interface TimerConfig {
   minutes: number;
   /** Number of seconds in the initial countdown value. */
   seconds: number;
+  /** Lead text shown before the countdown timer badge. */
+  leadText: string;
+  /** Supporting text shown after the countdown timer badge. */
+  helperText: string;
 }
 
 export interface FooterCopy {
-  /** Optional text appended after the dynamic "© YYYY BrandName" line, e.g.
-   *  "All rights reserved.". Leave undefined to show only the copyright line. */
-  suffix?: string;
+  /** Primary footer line (e.g. copyright/legal text). */
+  primaryLine: string;
+  /** Secondary footer line (e.g. security assurance text). */
+  secondaryLine: string;
 }
 
 export interface ThankYouStep {
@@ -165,6 +186,8 @@ export interface CheckoutContent {
   brand: BrandConfig;
   product: ProductConfig;
   productPage: ProductPageCopy;
+  header: HeaderCopy;
+  formPanel: FormPanelCopy;
   customer: CustomerFormCopy;
   shipping: ShippingFormCopy;
   payment: PaymentFormCopy;
@@ -226,6 +249,21 @@ export const checkoutContent: CheckoutContent = {
     ctaLabel: "Proceed to Checkout",
   },
 
+  header: {
+    topBar: {
+      badge: "Secure Checkout",
+      messages: [
+        "All transactions are secure and encrypted",
+        "Need Help? 1-800-390-6035",
+      ],
+    },
+  },
+
+  formPanel: {
+    title: "Secure Checkout",
+    subtitle: "Complete your details below to place your order.",
+  },
+
   customer: {
     title: "Customer Information",
     emailLabel: "Email Address",
@@ -268,10 +306,14 @@ export const checkoutContent: CheckoutContent = {
     expiryPlaceholder: "MM / YY",
     cvvLabel: "CVV",
     cvvPlaceholder: "CVV",
+    loadingMessage: "Loading secure payment form...",
+    errorFallbackMessage: "Could not load the payment form.",
   },
 
   summary: {
-    title: "Order Summary",
+    title: "Cart Summary",
+    includedProductsTitle: "Included Products",
+    includedProductSuffix: "",
     shipping: { id: "shipping", label: "Shipping", value: "$7.95" },
     tax: { id: "tax", label: "Tax", value: "$0.00" },
     total: { id: "total", label: "Total", value: "$56.95" },
@@ -297,10 +339,13 @@ export const checkoutContent: CheckoutContent = {
     days: 0,
     minutes: 14,
     seconds: 59,
+    leadText: "Offer reserved for:",
+    helperText: "Complete checkout now to keep your bonus.",
   },
 
   footer: {
-    suffix: "All rights reserved.",
+    primaryLine: "Copyright 2026 CheckoutVibes. All rights reserved.",
+    secondaryLine: "Secure checkout powered by ConvesioPay.",
   },
 
   thankYou: {

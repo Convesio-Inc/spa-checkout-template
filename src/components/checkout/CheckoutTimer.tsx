@@ -1,28 +1,18 @@
 /**
  * CheckoutTimer
  * -----------------------------------------------------------------------------
- * Full-width countdown banner rendered below CheckoutHeader. Creates urgency
- * by showing a live timer that counts down from the value defined in
- * `checkoutContent.timer`. Stops at zero.
- *
- * Visual language: brand background (`bg-brand`) with white text, matching the
- * primary color used throughout the page for accents.
- *
- * Layout:
- *   [clock icon]  Your offer expires in   |   00 DAYS  :  00 MINS  :  00 SECS
+ * Template-inspired countdown banner rendered inside the checkout form stack.
+ * Displays lead text, a live MM:SS timer badge, and helper text. Stops at zero.
  *
  * Content source: `checkoutContent.timer`
  *
  * Markers:
- *   - root     data-section="checkout-timer"
- *   - days     data-slot="days"
- *   - minutes  data-slot="minutes"
- *   - seconds  data-slot="seconds"
+ *   - root              data-section="checkout-timer"
+ *   - countdown timer   data-slot="countdown-timer"
  * -----------------------------------------------------------------------------
  */
 
 import { useEffect, useState } from "react";
-import { ClockIcon } from "lucide-react";
 
 import type { TimerConfig } from "@/content/checkout";
 
@@ -48,59 +38,26 @@ export function CheckoutTimer({ timer }: CheckoutTimerProps) {
     return () => clearInterval(id);
   }, [remaining]);
 
-  const days = Math.floor(remaining / 86400);
-  const minutes = Math.floor((remaining % 86400) / 60);
+  const minutes = Math.floor(remaining / 60);
   const seconds = remaining % 60;
+  const mmss = `${pad(minutes)}:${pad(seconds)}`;
 
   return (
     <div
       data-section="checkout-timer"
-      className="flex items-center justify-between gap-4 rounded-xl bg-brand px-5 py-2 text-brand-foreground sm:px-6"
+      aria-live="polite"
+      className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-[#d9e4da] bg-[#f7fbf7] px-3 py-2.5 text-xs text-[#3f5c49] sm:text-sm"
     >
-      <div className="flex items-center gap-2 text-sm font-medium opacity-90">
-        <ClockIcon className="h-4 w-4 shrink-0" />
-        <span>Your offer expires in</span>
-      </div>
-
-      <div className="flex items-center gap-2 sm:gap-3">
-        <Unit slot="days" value={days} label="Days" />
-        <Colon />
-        <Unit slot="minutes" value={minutes} label="Mins" />
-        <Colon />
-        <Unit slot="seconds" value={seconds} label="Secs" />
-      </div>
-    </div>
-  );
-}
-
-function Unit({
-  slot,
-  value,
-  label,
-}: {
-  slot: string;
-  value: number;
-  label: string;
-}) {
-  return (
-    <div className="flex flex-col items-center leading-none">
+      <strong className="text-xs font-semibold tracking-[0.01em] sm:text-sm">
+        {timer.leadText}
+      </strong>
       <span
-        data-slot={slot}
-        className="font-mono text-xl font-bold tabular-nums sm:text-xl"
+        data-slot="countdown-timer"
+        className="inline-block min-w-[52px] rounded-md border border-[#d2dfd4] bg-[#edf3ee] px-[7px] py-[3px] text-center font-mono text-sm font-bold tracking-[0.01em] text-[#264635] tabular-nums sm:text-sm"
       >
-        {pad(value)}
+        {mmss}
       </span>
-      <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest opacity-80">
-        {label}
-      </span>
+      <span>{timer.helperText}</span>
     </div>
-  );
-}
-
-function Colon() {
-  return (
-    <span className="mb-3 font-mono text-xl font-bold opacity-60 sm:text-2xl">
-      :
-    </span>
   );
 }

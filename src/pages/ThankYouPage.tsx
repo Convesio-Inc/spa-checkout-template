@@ -25,7 +25,6 @@
 import { AlertCircleIcon } from "lucide-react";
 import { useSearchParams } from "react-router";
 
-import { CheckoutFooter } from "@/components/checkout/CheckoutFooter";
 import { GuaranteeBadge } from "@/components/checkout/primitives/GuaranteeBadge";
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 import {
@@ -38,7 +37,7 @@ import { checkoutContent } from "@/content/checkout";
 import { useThankYouPayment } from "@/hooks/useThankYouPayment";
 
 export function ThankYouPage() {
-  const { brand, product, summary, security, guarantee, footer, thankYou } =
+  const { brand, product, summary, guarantee, thankYou } =
     checkoutContent;
 
   const [searchParams] = useSearchParams();
@@ -84,7 +83,6 @@ export function ThankYouPage() {
               title={thankYou.confirmation.title}
               product={product}
               summary={summary}
-              security={security}
             />
             {/* #endregion */}
 
@@ -106,12 +104,6 @@ export function ThankYouPage() {
             {/* #endregion */}
           </>
         )}
-
-        <CheckoutFooter
-          brandName={brand.name}
-          copy={footer}
-          security={security}
-        />
       </div>
     </main>
   );

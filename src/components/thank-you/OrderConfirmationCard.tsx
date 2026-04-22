@@ -2,7 +2,7 @@
  * OrderConfirmationCard
  * -----------------------------------------------------------------------------
  * Summarises the purchased item and order totals on the thank-you page.
- * Reuses SectionCard, PriceRow, SecureBadge, and Separator from the existing
+ * Reuses SectionCard, PriceRow, and Separator from the existing
  * component library.
  *
  * Markers:
@@ -14,28 +14,21 @@
  * -----------------------------------------------------------------------------
  */
 
-import { SecureBadge } from "@/components/checkout/primitives/SecureBadge";
 import { PriceRow } from "@/components/checkout/primitives/PriceRow";
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 import { Separator } from "@/components/ui/separator";
-import type {
-  ProductConfig,
-  SecurityCopy,
-  SummaryConfig,
-} from "@/content/checkout";
+import type { ProductConfig, SummaryConfig } from "@/content/checkout";
 
 export interface OrderConfirmationCardProps {
   title: string;
   product: ProductConfig;
   summary: SummaryConfig;
-  security: SecurityCopy;
 }
 
 export function OrderConfirmationCard({
   title,
   product,
   summary,
-  security,
 }: OrderConfirmationCardProps) {
   return (
     <SectionCard section="order-confirmation" title={title}>
@@ -69,8 +62,6 @@ export function OrderConfirmationCard({
         labelClassName="font-bold"
         valueClassName="font-bold"
       />
-
-      <SecureBadge label={security.label} className="mt-1 self-center" />
     </SectionCard>
   );
 }

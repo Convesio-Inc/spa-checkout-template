@@ -25,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 import type { ShippingFormCopy } from "@/content/checkout";
 
 export interface ShippingInfoValue {
@@ -38,24 +37,23 @@ export interface ShippingInfoValue {
   country: string;
 }
 
-export interface ShippingInfoCardProps {
+export interface ShippingInfoProps {
   copy: ShippingFormCopy;
   value: ShippingInfoValue;
   onChange: (next: ShippingInfoValue) => void;
 }
 
-export function ShippingInfoCard({
+export function ShippingInfo({
   copy,
   value,
   onChange,
-}: ShippingInfoCardProps) {
+}: ShippingInfoProps) {
   const set =
     (key: keyof ShippingInfoValue) =>
     (event: React.ChangeEvent<HTMLInputElement>) =>
       onChange({ ...value, [key]: event.target.value });
 
   return (
-    <SectionCard section="shipping-info" title={copy.title}>
       <FieldGroup>
         <Field data-field="full-name">
           <FieldLabel htmlFor="ship-full-name">{copy.fullNameLabel}</FieldLabel>
@@ -162,6 +160,5 @@ export function ShippingInfoCard({
           </Field>
         </div>
       </FieldGroup>
-    </SectionCard>
   );
 }

@@ -1,5 +1,5 @@
 /**
- * PaymentInfoCard
+ * PaymentInfo
  * -----------------------------------------------------------------------------
  * Hosts the ConvesioPay checkout component (a PCI-compliant iframe widget that
  * tokenizes card data on ConvesioPay's side). The SDK is initialized + mounted
@@ -19,11 +19,10 @@
 
 import { useEffect, useRef } from "react";
 
-import { SectionCard } from "@/components/checkout/primitives/SectionCard";
-import { useConvesioPayCheckout } from "@/hooks/useConvesioPayCheckout";
 import type { PaymentFormCopy } from "@/content/checkout";
+import { useConvesioPayCheckout } from "@/hooks/useConvesioPayCheckout";
 
-export interface PaymentInfoCardProps {
+export interface PaymentInfoProps {
   copy: PaymentFormCopy;
   customerEmail?: string;
   /** Fires whenever the ConvesioPay component reports a validity change. */
@@ -33,12 +32,12 @@ export interface PaymentInfoCardProps {
   onComponentReady?: (component: ConvesioPayComponent) => void;
 }
 
-export function PaymentInfoCard({
+export function PaymentInfo({
   copy,
   customerEmail,
   onValidityChange,
   onComponentReady,
-}: PaymentInfoCardProps) {
+}: PaymentInfoProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const { status, error, isValid, component } = useConvesioPayCheckout(
     mountRef,
@@ -57,7 +56,7 @@ export function PaymentInfoCard({
   }, [component, onComponentReady]);
 
   return (
-    <SectionCard section="payment-info" title={copy.title}>
+    <div>
       <div
         ref={mountRef}
         data-slot="cpay-mount"
@@ -71,7 +70,7 @@ export function PaymentInfoCard({
           className="text-sm text-muted-foreground"
           aria-live="polite"
         >
-          Loading secure payment form…
+          {copy.loadingMessage}
         </p>
       )}
 
@@ -81,9 +80,9 @@ export function PaymentInfoCard({
           role="alert"
           className="text-sm text-destructive"
         >
-          {error?.message ?? "Could not load the payment form."}
+          {error?.message ?? copy.errorFallbackMessage}
         </p>
       )}
-    </SectionCard>
+    </div>
   );
 }

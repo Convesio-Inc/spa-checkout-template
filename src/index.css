@@ -1,11 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    --font-sans: Arial, Helvetica, sans-serif;
     --color-brand: var(--brand);
     --color-brand-foreground: var(--brand-foreground);
     --color-brand-accent: var(--brand-accent);
@@ -36,6 +35,14 @@
     --color-card: var(--card);
     --color-foreground: var(--foreground);
     --color-background: var(--background);
+    --color-pay-cta-from: var(--pay-cta-from);
+    --color-pay-cta-to: var(--pay-cta-to);
+    --color-pay-cta-hover-from: var(--pay-cta-hover-from);
+    --color-pay-cta-hover-to: var(--pay-cta-hover-to);
+    --color-pay-cta-foreground: var(--pay-cta-foreground);
+    --shadow-pay-cta: var(--pay-cta-shadow);
+    --shadow-pay-cta-hover: var(--pay-cta-shadow-hover);
+    --animate-pay-cta-pulse: pay-cta-pulse 2.4s ease-in-out infinite;
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -48,17 +55,23 @@
  * Change these three tokens to re-skin the primary CTA and accent color
  * without touching any component.
  *
- *   --brand            Pay Now button fill
- *   --brand-foreground Text / icon color on top of --brand
- *   --brand-accent     Pay Now hover fill
  */
 :root {
     --brand: oklch(0.2861 0.0429 162.59);
     --brand-foreground: oklch(0.99 0 0);
     --brand-accent: oklch(0.58 0.17 262);
     --brand-accent-foreground: oklch(0.99 0 0);
+    --pay-cta-from: oklch(0.78 0.14 63);
+    --pay-cta-to: oklch(0.71 0.16 57);
+    --pay-cta-hover-from: oklch(0.75 0.14 63);
+    --pay-cta-hover-to: oklch(0.67 0.16 57);
+    --pay-cta-foreground: oklch(0.99 0 0);
+    --pay-cta-shadow: 0 12px 20px oklch(0.56 0.13 56 / 0.34);
+    --pay-cta-shadow-hover: 0 16px 26px oklch(0.52 0.13 56 / 0.4);
 
-    --background: oklch(0.9722 0.0085 128.56);
+    --background: oklch(0.9698 0.0062 137.77);
+    --header-background: oklch(0.9722 0.0085 128.56);
+    --header-border: oklch(0.909 0.0203 150.08);
     --foreground: oklch(0.18 0.015 260);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.18 0.015 260);
@@ -85,6 +98,17 @@
     --sidebar-accent-foreground: oklch(0.22 0.015 260);
     --sidebar-border: oklch(0.9 0.01 260);
     --sidebar-ring: oklch(0.66 0.19 262);
+}
+
+@keyframes pay-cta-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: var(--pay-cta-shadow);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 16px 28px oklch(0.54 0.13 56 / 0.43);
+  }
 }
 
 @layer base {

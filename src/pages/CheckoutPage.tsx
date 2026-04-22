@@ -22,7 +22,6 @@
  * Layout (top to bottom, all inside a single `max-w-5xl` content column):
  *   - CheckoutHeader  — floating card matching the section cards below
  *   - Two-column grid — form stack + order summary
- *   - CheckoutFooter  — plain centered copyright line, no card chrome
  *
  * Markers:
  *   - root            data-page="checkout"
@@ -33,23 +32,22 @@
 
 import { useCallback, useRef, useState } from "react";
 
-import { CheckoutFooter } from "@/components/checkout/CheckoutFooter";
 import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
 import { CheckoutTimer } from "@/components/checkout/CheckoutTimer";
 import {
-  CustomerInfoCard,
+  CustomerInfo,
   type CustomerInfoValue,
-} from "@/components/checkout/CustomerInfoCard";
+} from "@/components/checkout/CustomerInfo";
 import { OrderSummaryCard } from "@/components/checkout/OrderSummaryCard";
-import { PaymentInfoCard } from "@/components/checkout/PaymentInfoCard";
+import { PaymentInfo } from "@/components/checkout/PaymentInfo";
 import { PaymentStatusDialog } from "@/components/checkout/PaymentStatusDialog";
-import { SecureBadge } from "@/components/checkout/primitives/SecureBadge";
 import {
-  ShippingInfoCard,
+  ShippingInfo,
   type ShippingInfoValue,
-} from "@/components/checkout/ShippingInfoCard";
+} from "@/components/checkout/ShippingInfo";
 import { checkoutContent } from "@/content/checkout";
 import { useCheckoutPayment } from "@/hooks/useCheckoutPayment";
+import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 
 const INITIAL_CUSTOMER: CustomerInfoValue = {
   email: "",
@@ -83,16 +81,13 @@ export function CheckoutPage() {
   const { status, error, result, pay, reset } = useCheckoutPayment();
 
   const {
-    brand,
     product,
+    formPanel,
     customer: customerCopy,
     shipping: shippingCopy,
     payment,
     summary,
-    security,
-    guarantee,
     timer,
-    footer,
   } = checkoutContent;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -135,54 +130,76 @@ export function CheckoutPage() {
   return (
     <main
       data-page="checkout"
-      className="min-h-dvh bg-background py-6 sm:py-10"
+      className="min-h-dvh bg-background"
     >
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 sm:px-6">
-        <CheckoutHeader
-          brand={brand}
-          productName={product.name}
-          productDescription={product.description}
-          productHeroImage={product.heroImage}
-        />
+        <CheckoutHeader />
 
-        <CheckoutTimer timer={timer} />
-
-        <SecureBadge
-          data-section="secure-notice"
-          label={security.label}
-          className="self-center"
-        />
 
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr] lg:items-start">
             {/* #region SECTION: Form Stack */}
-            <div data-region="form-stack" className="flex flex-col gap-4">
-              <CustomerInfoCard
-                copy={customerCopy}
-                value={customer}
-                onChange={setCustomer}
-              />
-              <ShippingInfoCard
-                copy={shippingCopy}
-                value={shipping}
-                onChange={setShipping}
-              />
-              <PaymentInfoCard
-                copy={payment}
-                customerEmail={customer.email || undefined}
-                onValidityChange={setIsPaymentValid}
-                onComponentReady={handleComponentReady}
-              />
+            <div data-region="form-stack">
+              <SectionCard section="checkout-panel">
+                <div data-slot="panel-intro" className="mb-1">
+                  <h1 className="text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.025em] text-foreground">
+                    {formPanel.title}
+                  </h1>
+                  <p className="mt-3 text-[15px] text-muted-foreground">
+                    {formPanel.subtitle}
+                  </p>
+                </div>
+
+                <CheckoutTimer timer={timer} />
+
+                <section data-section="customer-info">
+                  <h2 className="mb-3 text-lg font-semibold text-[#163427]">
+                    {customerCopy.title}
+                  </h2>
+                  <CustomerInfo
+                    copy={customerCopy}
+                    value={customer}
+                    onChange={setCustomer}
+                  />
+                </section>
+
+                <section
+                  data-section="payment-info"
+                  className="mt-2 border-t border-border pt-5"
+                >
+                  <h2 className="mb-3 text-lg font-semibold text-[#163427]">
+                    {payment.title}
+                  </h2>
+                  <PaymentInfo
+                    copy={payment}
+                    customerEmail={customer.email || undefined}
+                    onValidityChange={setIsPaymentValid}
+                    onComponentReady={handleComponentReady}
+                  />
+                </section>
+
+                <section
+                  data-section="shipping-info"
+                  className="mt-2 border-t border-border pt-5"
+                >
+                  <h2 className="mb-3 text-lg font-semibold text-[#163427]">
+                    {shippingCopy.title}
+                  </h2>
+                  <ShippingInfo
+                    copy={shippingCopy}
+                    value={shipping}
+                    onChange={setShipping}
+                  />
+                </section>
+              </SectionCard>
             </div>
             {/* #endregion */}
 
-            {/* #region SECTION: Order Summary */}
+            {/* #region SECTION: Cart Summary */}
             <div data-region="summary" className="lg:sticky lg:top-6">
               <OrderSummaryCard
                 copy={summary}
                 product={product}
-                security={security}
-                guarantee={guarantee}
                 payDisabled={!isPaymentValid}
                 payLoading={isProcessing}
               />
@@ -190,12 +207,6 @@ export function CheckoutPage() {
             {/* #endregion */}
           </div>
         </form>
-
-        <CheckoutFooter
-          brandName={brand.name}
-          copy={footer}
-          security={security}
-        />
       </div>
 
       <PaymentStatusDialog

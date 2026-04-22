@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 export interface SectionCardProps extends React.ComponentProps<"div"> {
   section: string;
-  title: string;
+  title?: string;
 }
 
 export function SectionCard({
@@ -32,18 +32,23 @@ export function SectionCard({
     <Card
       data-section={section}
       data-slot="section-card"
-      className={cn(className)}
+      className={cn(
+        "gap-0 rounded-2xl border border-[#d8e3d7] py-5 shadow-[0_8px_22px_rgba(18,48,30,0.07)] ring-0",
+        className,
+      )}
       {...rest}
     >
-      <CardHeader>
-        <CardTitle
-          data-slot="section-title"
-          className="text-base font-semibold tracking-tight"
-        >
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+      {title ? (
+        <CardHeader className="px-5 sm:px-6">
+          <CardTitle
+            data-slot="section-title"
+            className="text-base font-semibold tracking-tight"
+          >
+            {title}
+          </CardTitle>
+        </CardHeader>
+      ) : null}
+      <CardContent className="px-5 sm:px-6">
         <div className="flex flex-col gap-3">{children}</div>
       </CardContent>
     </Card>
