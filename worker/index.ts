@@ -38,7 +38,7 @@ import { signCheckoutToken, verifyCheckoutToken } from './jwt';
  *
  * The matching hostnames mirror the dashboard split:
  *   live   → https://api.convesiopay.com
- *   test   → https://api.dev.convesiopay.com
+ *   test   → https://api-qa.convesiopay.com
  */
 const CPAY_API_HOSTS = {
   live: 'https://api.convesiopay.com',
