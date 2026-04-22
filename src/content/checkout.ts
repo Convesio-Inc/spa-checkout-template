@@ -162,6 +162,12 @@ export interface ThankYouCopy {
   subheading: string;
   confirmation: { title: string };
   nextSteps: { title: string; steps: ThankYouStep[] };
+  receipt: {
+    title: string;
+    backToProductLabel: string;
+    backToProductHref: string;
+    guaranteeNote: string;
+  };
 }
 
 export interface SecurityCopy {
@@ -374,6 +380,12 @@ export const checkoutContent: CheckoutContent = {
             "Your package will be on its way soon. Expect delivery within 5–7 business days.",
         },
       ],
+    },
+    receipt: {
+      title: "Receipt Summary",
+      backToProductLabel: "Back to Product Page",
+      backToProductHref: "/product",
+      guaranteeNote: "Your 60-day return window starts from the purchase date.",
     },
   },
 };

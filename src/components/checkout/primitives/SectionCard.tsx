@@ -19,11 +19,13 @@ import { cn } from "@/lib/utils";
 export interface SectionCardProps extends React.ComponentProps<"div"> {
   section: string;
   title?: string;
+  titleClassName?: string;
 }
 
 export function SectionCard({
   section,
   title,
+  titleClassName,
   className,
   children,
   ...rest
@@ -42,7 +44,10 @@ export function SectionCard({
         <CardHeader className="px-5 sm:px-6">
           <CardTitle
             data-slot="section-title"
-            className="text-base font-semibold tracking-tight"
+            className={cn(
+              "text-base font-semibold tracking-tight",
+              titleClassName,
+            )}
           >
             {title}
           </CardTitle>

@@ -26,7 +26,7 @@
  */
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { PriceRow } from "@/components/checkout/primitives/PriceRow";
 import type {
@@ -65,12 +65,6 @@ export function OrderSummaryCard({
 
       <CardContent className="flex flex-col gap-3">
         <div
-          data-slot="included-products-title"
-          className="mt-1 text-sm font-bold text-[#1a3c2b]"
-        >
-          {copy.includedProductsTitle}
-        </div>
-        <div
           data-slot="included-products-list"
           className="rounded-[10px] border border-border bg-[#fafcf8] p-2.5"
         >
@@ -89,6 +83,12 @@ export function OrderSummaryCard({
               {product.salePrice}
             </strong>
           </div>
+        </div>
+        <div
+          data-slot="included-products-title"
+          className="mt-1 text-sm font-bold text-[#1a3c2b]"
+        >
+          {copy.includedProductsTitle}
         </div>
 
         <div className="flex flex-col gap-2">
@@ -111,29 +111,26 @@ export function OrderSummaryCard({
             labelClassName="font-bold text-[#122f22]"
             valueClassName="text-[22px] font-bold text-[#122f22]"
           />
+          <Button
+            data-slot="cta-primary"
+            type="submit"
+            size="lg"
+            disabled={disabled}
+            aria-disabled={disabled}
+            className="h-12 w-full rounded-lg border-0 bg-linear-to-b from-pay-cta-from to-pay-cta-to text-base font-extrabold tracking-[0.02em] text-pay-cta-foreground uppercase shadow-pay-cta transition-[transform,box-shadow,background-image] duration-200 hover:from-pay-cta-hover-from hover:to-pay-cta-hover-to hover:shadow-pay-cta-hover motion-safe:animate-pay-cta-pulse cursor-pointer"
+          >
+            {payLoading && <Spinner data-icon="inline-start" />}
+            {copy.ctaLabel}
+          </Button>
+
+          <p
+            data-slot="cta-footnote"
+            className="text-xs leading-relaxed text-muted-foreground"
+          >
+            {copy.ctaFootnote}
+          </p>
         </div>
       </CardContent>
-
-      <CardFooter className="flex-col items-start gap-3">
-        <Button
-          data-slot="cta-primary"
-          type="submit"
-          size="lg"
-          disabled={disabled}
-          aria-disabled={disabled}
-          className="h-12 w-full rounded-lg border-0 bg-linear-to-b from-pay-cta-from to-pay-cta-to text-base font-extrabold tracking-[0.02em] text-pay-cta-foreground uppercase shadow-pay-cta transition-[transform,box-shadow,background-image] duration-200 hover:-translate-y-px hover:from-pay-cta-hover-from hover:to-pay-cta-hover-to hover:shadow-pay-cta-hover motion-safe:animate-pay-cta-pulse"
-        >
-          {payLoading && <Spinner data-icon="inline-start" />}
-          {copy.ctaLabel}
-        </Button>
-
-        <p
-          data-slot="cta-footnote"
-          className="text-xs leading-relaxed text-muted-foreground"
-        >
-          {copy.ctaFootnote}
-        </p>
-      </CardFooter>
     </Card>
   );
 }
