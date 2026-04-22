@@ -34,6 +34,7 @@ import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 import { Button } from "@/components/ui/button";
 import { checkoutContent } from "@/content/config";
 import { useThankYouPayment } from "@/hooks/useThankYouPayment";
+import { Spinner } from "@/components/ui/spinner";
 
 export function ThankYouPage() {
   const { product, summary, thankYou } = checkoutContent;

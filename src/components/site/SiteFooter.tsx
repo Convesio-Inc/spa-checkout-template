@@ -1,4 +1,4 @@
-import { checkoutContent } from "@/content/checkout";
+import { checkoutContent } from "@/content/config";
 
 export function SiteFooter() {
   const { footer } = checkoutContent;

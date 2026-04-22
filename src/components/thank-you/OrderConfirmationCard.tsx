@@ -19,7 +19,6 @@ import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 import { Separator } from "@/components/ui/separator";
 import type {
   ProductConfig,
-  SecurityCopy,
   SummaryConfig,
 } from "@/content/config";
 

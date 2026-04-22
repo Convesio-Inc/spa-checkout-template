@@ -1,4 +1,7 @@
 import { checkoutContent } from "@/content/config";
+import { SectionCard } from "@/components/checkout/primitives/SectionCard";
+import { PriceRow } from "@/components/checkout/primitives/PriceRow";
+import { Button } from "@/components/ui/button";
 
 export function ProductPage() {
   const { product, productPage, summary, guarantee } = checkoutContent;
