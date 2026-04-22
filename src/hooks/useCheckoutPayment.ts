@@ -70,6 +70,10 @@ export interface PaymentResponse {
   status?: string;
   amount?: number;
   currency?: string;
+  /** Present when the worker produces a thank-you redirect (i.e. the payment
+   *  landed on a success or pending status). The hook navigates to this URL
+   *  instead of surfacing the success/pending modal. */
+  redirectUrl?: string;
   [key: string]: unknown;
 }
 
@@ -165,6 +169,16 @@ export function useCheckoutPayment(): UseCheckoutPaymentResult {
       }
 
       setResult(body);
+
+      // Success or pending → hand off to the thank-you page. We keep status
+      // at "processing" so the non-dismissable processing modal stays up
+      // until the browser navigates, avoiding a flash of the old
+      // success/pending modal mid-redirect.
+      if (body?.redirectUrl) {
+        window.location.assign(body.redirectUrl);
+        return;
+      }
+
       setStatus(
         body?.status && PENDING_STATUSES.has(body.status)
           ? "pending"
