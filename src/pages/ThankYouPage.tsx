@@ -98,7 +98,7 @@ export function ThankYouPage() {
 
             <div
               data-section="thank-you-layout"
-              className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
+              className="grid gap-4 lg:grid-cols-[1.6fr_1fr] lg:items-start"
             >
               <section data-region="thank-you-main" className="flex flex-col gap-4">
                 <SectionCard
