@@ -6,7 +6,7 @@
  * -----------------------------------------------------------------------------
  */
 
-import { checkoutContent } from "@/content/checkout";
+import { checkoutContent } from "@/content/config";
 
 export function CheckoutHeader() {
   const { badge, messages } = checkoutContent.header.topBar;

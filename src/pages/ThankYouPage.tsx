@@ -32,8 +32,7 @@ import { useSearchParams } from "react-router";
 import { PriceRow } from "@/components/checkout/primitives/PriceRow";
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
-import { checkoutContent } from "@/content/checkout";
+import { checkoutContent } from "@/content/config";
 import { useThankYouPayment } from "@/hooks/useThankYouPayment";
 
 export function ThankYouPage() {

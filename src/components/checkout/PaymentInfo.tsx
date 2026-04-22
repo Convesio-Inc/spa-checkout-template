@@ -19,7 +19,7 @@
 
 import { useEffect, useRef } from "react";
 
-import type { PaymentFormCopy } from "@/content/checkout";
+import type { PaymentFormCopy } from "@/content/config";
 import { useConvesioPayCheckout } from "@/hooks/useConvesioPayCheckout";
 
 export interface PaymentInfoProps {

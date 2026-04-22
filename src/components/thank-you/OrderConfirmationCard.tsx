@@ -17,7 +17,11 @@
 import { PriceRow } from "@/components/checkout/primitives/PriceRow";
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 import { Separator } from "@/components/ui/separator";
-import type { ProductConfig, SummaryConfig } from "@/content/checkout";
+import type {
+  ProductConfig,
+  SecurityCopy,
+  SummaryConfig,
+} from "@/content/config";
 
 export interface OrderConfirmationCardProps {
   title: string;

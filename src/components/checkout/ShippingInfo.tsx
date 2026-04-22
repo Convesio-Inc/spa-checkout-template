@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ShippingFormCopy } from "@/content/checkout";
+import type { ShippingFormCopy } from "@/content/config";
 
 export interface ShippingInfoValue {
   fullName: string;

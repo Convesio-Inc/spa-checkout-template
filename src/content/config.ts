@@ -1,5 +1,5 @@
 /**
- * checkout.ts
+ * config.ts
  * -----------------------------------------------------------------------------
  * Single source of truth for every user-visible string, price, and image used
  * by the checkout page. Swap values here to re-skin the page without touching

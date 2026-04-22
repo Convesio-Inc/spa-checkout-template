@@ -32,7 +32,7 @@ import { PriceRow } from "@/components/checkout/primitives/PriceRow";
 import type {
   ProductConfig,
   SummaryConfig,
-} from "@/content/checkout";
+} from "@/content/config";
 
 export interface OrderSummaryCardProps {
   copy: SummaryConfig;
