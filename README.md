@@ -41,8 +41,9 @@ Built with **React 19**, **TypeScript**, **Vite**, **Tailwind CSS v4** and **sha
 ## Features
 
 - **Full checkout flow out of the box** — product page, checkout form (customer + shipping + payment), order summary and a "Thank You" confirmation page.
+- **3D Secure (3DS) support** — the checkout automatically handles 3DS bank challenges and resumes the flow on return, polling for the final payment status.
 - **Secure by design** — your secret keys live only in the Cloudflare Worker; the browser never sees them.
-- **Re-skinnable in minutes** — all copy, prices and images are centralized in a single config file, and your brand color is driven by three CSS variables.
+- **Re-skinnable in minutes** — all copy, prices and images are centralized in a single config file, and your brand color is driven by a handful of CSS variables.
 - **Sandbox-first** — ships in test mode so you can iterate safely before going live with a single environment-variable change.
 - **Modern stack** — React 19, TypeScript, Vite, Tailwind v4, shadcn/ui components, React Router 7.
 
@@ -56,8 +57,11 @@ Built with **React 19**, **TypeScript**, **Vite**, **Tailwind CSS v4** and **sha
                  │   React + ConvesioPay  │
                  │   iframe SDK           │
                  └───────────┬────────────┘
-                             │  1. GET /config       (public client key)
-                             │  2. POST /payments    (tokenized card)
+                             │  1. GET  /config        (public client key)
+                             │  2. POST /payments      (tokenized card)
+                             │  3. POST /verify-token  (decode thank-you JWT)
+                             │  4. POST /issue-token   (mint JWT after 3DS)
+                             │  5. POST /poll-payment  (poll payment status)
                              ▼
                  ┌────────────────────────┐
                  │  Cloudflare Worker     │
@@ -73,7 +77,7 @@ Built with **React 19**, **TypeScript**, **Vite**, **Tailwind CSS v4** and **sha
                  └────────────────────────┘
 ```
 
-The SPA tokenizes the card with the ConvesioPay SDK iframe, then the Worker validates the payload and forwards it to ConvesioPay with the secret credentials. The customer is then redirected to the Thank You page with the payment outcome.
+The SPA tokenizes the card with the ConvesioPay SDK iframe, then the Worker validates the payload and forwards it to ConvesioPay with the secret credentials. On a standard payment the customer is redirected to the Thank You page via a signed JWT in the URL. On a **3DS challenge** the SPA stashes the payment id in `sessionStorage`, sends the user to the bank's verify-customer page, and on return calls `/issue-token` to mint a thank-you JWT, then `/poll-payment` to track the final status.
 
 ---
 
@@ -129,7 +133,7 @@ Open your Static Site URL and run a test payment using the card numbers from the
 
 ## Environment Variables
 
-All four credentials are required. They are injected at runtime into the Cloudflare Worker — the browser never has direct access to them.
+All five credentials are required. They are injected at runtime into the Cloudflare Worker — the browser never has direct access to them.
 
 | Variable | Type | Description |
 |---|---|---|
@@ -167,37 +171,58 @@ Includes:
 
 - Brand name and icon
 - Product name, description, images, benefits and prices
+- Header top-bar badge and rotating messages
+- Form panel title and subtitle
 - Form copy (customer / shipping / payment fields, placeholders, labels)
 - Order summary and Pay Now CTA
+- Security badge label
+- Money-back guarantee (days, seal label, headline, description)
+- Countdown timer (days / minutes / seconds, lead text, helper text)
+- Thank You page (heading, subheading, "What Happens Next" steps, receipt copy)
 - Footer copy
 
 Replace the placeholder product and brand images in the `public/` folder and reference them from `config.ts`.
 
 ### 2. Brand colors — `src/index.css`
 
-Three CSS variables drive the primary color of the checkout:
+Two groups of CSS variables in the `/* === BRAND THEME === */` block drive the colors of the checkout.
+
+**Brand tokens** (accent colors, focus rings, etc.):
 
 ```css
---brand             /* Pay Now button fill */
---brand-foreground  /* Text/icon color on top of --brand */
---brand-accent      /* Pay Now hover fill */
+--brand                    /* primary brand fill */
+--brand-foreground         /* text/icon color on --brand */
+--brand-accent             /* accent fill (links, focus rings, etc.) */
+--brand-accent-foreground  /* text/icon color on --brand-accent */
 ```
 
-Find them in the `/* === BRAND THEME === */` block near the top of `src/index.css`.
+**Pay Now CTA gradient button**:
+
+```css
+--pay-cta-from          /* gradient start */
+--pay-cta-to            /* gradient end */
+--pay-cta-hover-from    /* hover gradient start */
+--pay-cta-hover-to      /* hover gradient end */
+--pay-cta-foreground    /* button text color */
+```
 
 ### 3. Layout and behavior — section components
 
 Each section of the checkout lives in its own component under `src/components/checkout/`:
 
 - `CheckoutHeader.tsx`
-- `CustomerInfoCard.tsx`
-- `ShippingInfoCard.tsx`
-- `PaymentInfoCard.tsx`
+- `CustomerInfo.tsx`
+- `ShippingInfo.tsx`
+- `PaymentInfo.tsx`
 - `OrderSummaryCard.tsx`
-- `CheckoutFooter.tsx`
+- `CheckoutTimer.tsx` — urgency countdown timer driven by `config.timer`
 - `PaymentStatusDialog.tsx`
 
-Compose or reorder them in `src/pages/CheckoutPage.tsx`. Each component starts with a JSDoc header listing its props and the `config.ts` path that feeds it.
+Shared layout atoms used by the above live in `src/components/checkout/primitives/` (`PriceRow.tsx`, `SectionCard.tsx`).
+
+The global site header and footer are in `src/components/site/` (`SiteHeader.tsx`, `SiteFooter.tsx`) and are rendered by `App.tsx` as layout wrappers around every page.
+
+Compose or reorder the checkout components in `src/pages/CheckoutPage.tsx`. Each component starts with a JSDoc header listing its props and the `config.ts` path that feeds it.
 
 ---
 
@@ -258,19 +283,23 @@ npm run preview    # Builds + serves through Wrangler
 ├── src/
 │   ├── components/
 │   │   ├── checkout/            Checkout-page section components
+│   │   │   └── primitives/      Shared layout atoms (PriceRow, SectionCard)
 │   │   ├── product/             Product-page components
+│   │   ├── site/                Global layout (SiteHeader, SiteFooter)
 │   │   ├── thank-you/           Thank-you-page components
 │   │   └── ui/                  shadcn/ui primitives
 │   ├── content/
 │   │   └── config.ts          ★ Central config: copy, prices, images
-│   ├── hooks/                   Checkout / payment / SDK hooks
+│   ├── hooks/                   Checkout / payment / SDK / thank-you hooks
+│   ├── interfaces/              Global TypeScript ambient declarations
 │   ├── lib/                     Utilities + ConvesioPay SDK singleton
 │   ├── pages/                   Route-level pages (Product, Checkout, ThankYou)
 │   ├── index.css                ★ Brand theme tokens
-│   ├── App.tsx                  Router setup
+│   ├── App.tsx                  Router + global SiteHeader/SiteFooter layout
 │   └── main.tsx                 App entry
 ├── worker/
-│   ├── index.ts                 Worker entry: /config and /payments routes
+│   ├── index.ts                 Worker entry: /config, /payments, /verify-token,
+│   │                            /issue-token, /poll-payment routes
 │   └── jwt.ts                   JWT helpers for secure server calls
 ├── wrangler.jsonc               Cloudflare Worker configuration
 ├── package.json

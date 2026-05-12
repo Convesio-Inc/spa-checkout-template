@@ -39,7 +39,7 @@ React 19 + TypeScript SPA (Vite) deployed as a **Cloudflare Worker** (`@cloudfla
 | File | Role |
 |---|---|
 | `src/content/config.ts` | **Start here for any copy/price/image change.** Typed config object; each section has its own interface. |
-| `src/index.css` | `/* === BRAND THEME === */` block — three `--brand*` tokens drive button color, hover, and text. |
+| `src/index.css` | `/* === BRAND THEME === */` block — four `--brand*` tokens (fill, foreground, accent, accent-foreground) plus five `--pay-cta-*` tokens for the Pay Now CTA gradient button. |
 | `src/App.tsx` | React Router 7 routes: `/` → `CheckoutPage`, `/product` → `ProductPage`, `/thank-you` → `ThankYouPage`. |
 | `src/pages/CheckoutPage.tsx` | Owns all form state; wires the two hooks together; drives `PaymentStatusDialog`. |
 | `src/pages/ThankYouPage.tsx` | Post-checkout landing page driven by the `?token=` JWT; renders verifying / pending / succeeded / failed. |
@@ -76,10 +76,11 @@ Three layers in increasing depth — only go deeper than you need:
 2. **Brand colors** → `/* === BRAND THEME === */` block in `src/index.css`
 3. **Layout or behaviour** → section components under `src/components/checkout/`, `src/components/product/`, `src/components/thank-you/`; compose or reorder them in the matching page under `src/pages/`.
 
-Section components live in three families:
+Section components live in four families:
 
-- `src/components/checkout/` — `CheckoutHeader`, `CheckoutTimer`, `CustomerInfoCard`, `ShippingInfoCard`, `PaymentInfoCard`, `OrderSummaryCard`, `CheckoutFooter`, `PaymentStatusDialog`, plus `primitives/` (`SectionCard`, `PriceRow`, `SecureBadge`, `GuaranteeBadge`).
-- `src/components/product/` — `ProductHeader`, `ProductHero`, `ProductCopySection`.
+- `src/components/checkout/` — `CheckoutHeader`, `CheckoutTimer`, `CustomerInfo`, `ShippingInfo`, `PaymentInfo`, `OrderSummaryCard`, `PaymentStatusDialog`, plus `primitives/` (`SectionCard`, `PriceRow`).
+- `src/components/site/` — `SiteHeader`, `SiteFooter` (rendered by `App.tsx` as global layout wrappers around every page).
+- `src/components/product/` — `ProductHero`, `ProductCopySection`.
 - `src/components/thank-you/` — `ThankYouHeader`, `OrderConfirmationCard`, `NextStepsCard`.
 
 Each section component starts with a JSDoc header listing its props and the `config.ts` path that feeds it.
@@ -102,7 +103,7 @@ Source regions are wrapped in `// #region SECTION: <Name>` / `// #endregion` com
 ## Conventions
 
 - `cn()` from `src/lib/utils.ts` is the standard class-merging utility (clsx + tailwind-merge).
-- shadcn UI primitives live in `src/components/ui/`. Checkout-specific primitives (`SectionCard`, `PriceRow`, `SecureBadge`, `GuaranteeBadge`) live in `src/components/checkout/primitives/`.
+- shadcn UI primitives live in `src/components/ui/`. Checkout-specific primitives (`SectionCard`, `PriceRow`) live in `src/components/checkout/primitives/`.
 - The ConvesioPay SDK instance is a module-level singleton in `src/lib/convesiopay.ts` — do not instantiate it elsewhere.
 - `SUCCESS_STATUSES` (`"Succeeded"`, `"Authorized"`) and `PENDING_STATUSES` (`"Pending"`) are intentionally duplicated between `src/hooks/useCheckoutPayment.ts`, `src/hooks/useThankYouPayment.ts`, and `worker/index.ts` — the worker and SPA compile as separate bundles, so keep all three in sync when changing them.
 - Never return the Worker `env` object from any response — it would leak every secret.
