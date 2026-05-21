@@ -40,7 +40,7 @@ export default function convesioExtensionLoader(): Plugin
             }
 
             // Emit a module that imports and exports them
-            const imports = extensions.map((name, i) => `import extension${i} from '${JSON.stringify(name)}';`).join('\n');
+            const imports = extensions.map((name, i) => `import extension${i} from ${JSON.stringify(name)};`).join('\n');
             const list = extensions.map((_, i) => `extension${i}`).join(', ');
 
             return `${imports}\nexport default [${list}];\n`;
