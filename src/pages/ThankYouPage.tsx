@@ -32,12 +32,10 @@ import { useSearchParams } from "react-router";
 import { PriceRow } from "@/components/checkout/primitives/PriceRow";
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 import { Button } from "@/components/ui/button";
-import { checkoutContent } from "@/content/config";
 import { useThankYouPayment } from "@/hooks/useThankYouPayment";
 import { Spinner } from "@/components/ui/spinner";
 
 export function ThankYouPage() {
-  const { product, summary, thankYou } = checkoutContent;
   const cardTitleClassName =
     "text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.025em] text-foreground";
 
@@ -72,7 +70,6 @@ export function ThankYouPage() {
   const mainCardSubtitle = isProcessing
     ? "Hang tight — your payment is going through a final review. This page will update automatically as soon as it clears."
     : "Your payment was processed successfully.";
-  const includedLabel = `${product.name}${summary.includedProductSuffix ? ` ${summary.includedProductSuffix}` : ""}`;
   const ctaClassName =
     "h-12 w-full rounded-lg border-0 bg-linear-to-b from-pay-cta-from to-pay-cta-to text-base font-extrabold tracking-[0.02em] text-pay-cta-foreground uppercase shadow-pay-cta transition-[transform,box-shadow,background-image] duration-200 hover:from-pay-cta-hover-from hover:to-pay-cta-hover-to hover:shadow-pay-cta-hover motion-safe:animate-pay-cta-pulse cursor-pointer";
 
@@ -199,7 +196,7 @@ export function ThankYouPage() {
 
                   <section className="mt-2 border-t border-border pt-4">
                     <h2 className="text-base font-semibold tracking-tight text-foreground">
-                      {thankYou.nextSteps.title}
+                      What Happens Next
                     </h2>
                     <div className="mt-3 space-y-3">
                       <div>
@@ -230,7 +227,7 @@ export function ThankYouPage() {
               </section>
 
               <aside data-region="thank-you-summary" className="lg:sticky lg:top-6 lg:h-max">
-                <SectionCard section="receipt-summary" title={thankYou.receipt.title}>
+                <SectionCard section="receipt-summary" title="Receipt Summary">
                   <div
                     data-slot="included-products-list"
                     className="rounded-[10px] border border-border bg-[#fafcf8] p-2.5"
@@ -241,13 +238,13 @@ export function ThankYouPage() {
                     >
                       <img
                         data-slot="included-product-thumb"
-                        src={product.image.src}
-                        alt={product.image.alt}
+                        src="/product-summary-image.jpeg"
+                        alt="Vitamin Essentials Pack product photo"
                         className="h-12 w-12 shrink-0 rounded-lg border border-[#d6e2d0] object-cover"
                       />
-                      <span className="flex-1 text-foreground">{includedLabel}</span>
+                      <span className="flex-1 text-foreground">Vitamin Essentials Pack</span>
                       <strong data-slot="included-product-price" className="text-foreground">
-                        {product.salePrice}
+                        $49.00
                       </strong>
                     </div>
                   </div>
@@ -256,33 +253,29 @@ export function ThankYouPage() {
                     data-slot="included-products-title"
                     className="mt-1 text-sm font-bold text-[#1a3c2b]"
                   >
-                    {summary.includedProductsTitle}
+                    Included Products
                   </div>
 
                   <div className="flex flex-col gap-2">
                     <PriceRow
                       data-slot="product-line"
-                      line={{
-                        id: "product",
-                        label: product.name,
-                        value: product.salePrice,
-                      }}
+                      line={{ id: "product", label: "Vitamin Essentials Pack", value: "$49.00" }}
                       className="my-2 text-[15px]"
                       valueClassName="font-bold"
                     />
                     <PriceRow
                       data-slot="shipping-line"
-                      line={summary.shipping}
+                      line={{ id: "shipping", label: "Shipping", value: "$7.95" }}
                       className="my-2 text-[15px]"
                     />
                     <PriceRow
                       data-slot="tax-line"
-                      line={summary.tax}
+                      line={{ id: "tax", label: "Tax", value: "$0.00" }}
                       className="my-2 text-[15px]"
                     />
                     <PriceRow
                       data-slot="total-line"
-                      line={summary.total}
+                      line={{ id: "total", label: "Total", value: "$56.95" }}
                       className="mt-3 border-t border-border pt-3 text-[22px]"
                       labelClassName="font-bold text-[#122f22]"
                       valueClassName="text-[22px] font-bold text-[#122f22]"
@@ -295,16 +288,14 @@ export function ThankYouPage() {
                       data-slot="cta-primary"
                       className={ctaClassName}
                     >
-                      <a href={thankYou.receipt.backToProductHref}>
-                        {thankYou.receipt.backToProductLabel}
-                      </a>
+                      <a href="/product">Back to Product Page</a>
                     </Button>
 
                     <div
                       data-slot="guarantee-note"
                       className="rounded-[10px] border border-[#b9e0be] bg-[#eff9f0] p-3 text-[13px] font-bold text-[#1f7a4d]"
                     >
-                      {thankYou.receipt.guaranteeNote}
+                      Your 60-day return window starts from the purchase date.
                     </div>
                   </div>
                 </SectionCard>

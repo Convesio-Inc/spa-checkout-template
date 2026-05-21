@@ -5,9 +5,7 @@
  * payload shape: full name, house number/name, street, city, state/province,
  * zip, and country. The card is fully controlled and every text `Input` is
  * `required` so the browser blocks `<form>` submission until they are filled.
- * Country is chosen from a `Select` (options from content).
- *
- * Content source: `checkoutContent.shipping`
+ * Country is chosen from a `Select`.
  *
  * Markers:
  *   - root                  data-section="shipping-info"
@@ -25,7 +23,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ShippingFormCopy } from "@/content/config";
+
+const COUNTRIES = [
+  { value: "US", label: "United States" },
+  { value: "CA", label: "Canada" },
+  { value: "GB", label: "United Kingdom" },
+  { value: "AU", label: "Australia" },
+] as const;
 
 export interface ShippingInfoValue {
   fullName: string;
@@ -38,13 +42,11 @@ export interface ShippingInfoValue {
 }
 
 export interface ShippingInfoProps {
-  copy: ShippingFormCopy;
   value: ShippingInfoValue;
   onChange: (next: ShippingInfoValue) => void;
 }
 
 export function ShippingInfo({
-  copy,
   value,
   onChange,
 }: ShippingInfoProps) {
@@ -56,11 +58,11 @@ export function ShippingInfo({
   return (
       <FieldGroup>
         <Field data-field="full-name">
-          <FieldLabel htmlFor="ship-full-name">{copy.fullNameLabel}</FieldLabel>
+          <FieldLabel htmlFor="ship-full-name">Full Name</FieldLabel>
           <Input
             id="ship-full-name"
             autoComplete="name"
-            placeholder={copy.fullNamePlaceholder}
+            placeholder="Jane Doe"
             required
             value={value.fullName}
             onChange={set("fullName")}
@@ -70,12 +72,12 @@ export function ShippingInfo({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(8rem,1fr)_2fr]">
           <Field data-field="house-number">
             <FieldLabel htmlFor="ship-house-number">
-              {copy.houseNumberOrNameLabel}
+              House Number / Name
             </FieldLabel>
             <Input
               id="ship-house-number"
               autoComplete="address-line1"
-              placeholder={copy.houseNumberOrNamePlaceholder}
+              placeholder="123"
               required
               value={value.houseNumberOrName}
               onChange={set("houseNumberOrName")}
@@ -83,12 +85,12 @@ export function ShippingInfo({
           </Field>
           <Field data-field="street">
             <FieldLabel htmlFor="ship-street">
-              {copy.streetAddressLabel}
+              Street Address
             </FieldLabel>
             <Input
               id="ship-street"
               autoComplete="address-line2"
-              placeholder={copy.streetAddressPlaceholder}
+              placeholder="Main St"
               required
               value={value.street}
               onChange={set("street")}
@@ -98,11 +100,11 @@ export function ShippingInfo({
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field data-field="city">
-            <FieldLabel htmlFor="ship-city">{copy.cityLabel}</FieldLabel>
+            <FieldLabel htmlFor="ship-city">City</FieldLabel>
             <Input
               id="ship-city"
               autoComplete="address-level2"
-              placeholder={copy.cityPlaceholder}
+              placeholder="Austin"
               required
               value={value.city}
               onChange={set("city")}
@@ -110,12 +112,12 @@ export function ShippingInfo({
           </Field>
           <Field data-field="state">
             <FieldLabel htmlFor="ship-state">
-              {copy.stateOrProvinceLabel}
+              State / Province
             </FieldLabel>
             <Input
               id="ship-state"
               autoComplete="address-level1"
-              placeholder={copy.stateOrProvincePlaceholder}
+              placeholder="TX"
               required
               value={value.stateOrProvince}
               onChange={set("stateOrProvince")}
@@ -125,19 +127,19 @@ export function ShippingInfo({
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field data-field="zip">
-            <FieldLabel htmlFor="ship-zip">{copy.zipLabel}</FieldLabel>
+            <FieldLabel htmlFor="ship-zip">Zip Code</FieldLabel>
             <Input
               id="ship-zip"
               inputMode="numeric"
               autoComplete="postal-code"
-              placeholder={copy.zipPlaceholder}
+              placeholder="73301"
               required
               value={value.zip}
               onChange={set("zip")}
             />
           </Field>
           <Field data-field="country">
-            <FieldLabel htmlFor="ship-country">{copy.countryLabel}</FieldLabel>
+            <FieldLabel htmlFor="ship-country">Country</FieldLabel>
             <Select
               value={value.country || undefined}
               onValueChange={(next) => onChange({ ...value, country: next })}
@@ -145,12 +147,12 @@ export function ShippingInfo({
               <SelectTrigger
                 id="ship-country"
                 className="w-full"
-                aria-label={copy.countryLabel}
+                aria-label="Country"
               >
-                <SelectValue placeholder={copy.countryPlaceholder} />
+                <SelectValue placeholder="Select a country" />
               </SelectTrigger>
               <SelectContent>
-                {copy.countries.map((c) => (
+                {COUNTRIES.map((c) => (
                   <SelectItem key={c.value} value={c.value}>
                     {c.label}
                   </SelectItem>

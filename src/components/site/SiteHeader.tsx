@@ -1,15 +1,18 @@
-import { checkoutContent } from "@/content/config";
+/**
+ * SiteHeader
+ * -----------------------------------------------------------------------------
+ * Global top navigation bar rendered on every page. Edit the brand name and nav
+ * links directly in this file.
+ * -----------------------------------------------------------------------------
+ */
 
 export function SiteHeader() {
-
-    const { brand } = checkoutContent;
-
     return (
         <header className="border-b py-4 bg-header-background border-header-border mb-6">
             <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between">
 
                 <div>
-                    <span className="text-base font-bold text-[#1f4933]">{brand.name}</span>
+                    <span className="text-base font-bold text-[#1f4933]">BioVerve</span>
                 </div>
 
                 <div className="flex items-center gap-2 text-[#335b43] text-sm">

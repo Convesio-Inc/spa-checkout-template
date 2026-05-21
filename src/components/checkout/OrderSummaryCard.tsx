@@ -9,8 +9,6 @@
  * button disables itself while the card widget is invalid (`payDisabled`) or
  * while a payment is in-flight (`payLoading`).
  *
- * Content source: `checkoutContent.summary` + `checkoutContent.product`
- *
  * Markers:
  *   - root              data-section="order-summary"
  *   - product block     data-slot="product-block"
@@ -22,21 +20,17 @@
  *   - cta footnote      data-slot="cta-footnote"
  *   - guarantee         data-slot="guarantee-badge"
  *
+ * WARNING: the displayed "Total" value below must stay in sync with
+ * `amountMinor` in CheckoutPage.tsx (the value passed to ConvesioPay).
  * -----------------------------------------------------------------------------
  */
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { PriceRow } from "@/components/checkout/primitives/PriceRow";
-import type {
-  ProductConfig,
-  SummaryConfig,
-} from "@/content/config";
 import { SectionCard } from "./primitives/SectionCard";
 
 export interface OrderSummaryCardProps {
-  copy: SummaryConfig;
-  product: ProductConfig;
   /** When true the Pay Now button is non-interactive. Defaults to false. */
   payDisabled?: boolean;
   /** When true the button shows a spinner and stays disabled. */
@@ -44,16 +38,13 @@ export interface OrderSummaryCardProps {
 }
 
 export function OrderSummaryCard({
-  copy,
-  product,
   payDisabled = false,
   payLoading = false,
 }: OrderSummaryCardProps) {
   const disabled = payDisabled || payLoading;
-  const includedLabel = `${product.name}${copy.includedProductSuffix ? ` ${copy.includedProductSuffix}` : ""}`;
 
   return (
-    <SectionCard section="order-summary" title={copy.title}>
+    <SectionCard section="order-summary" title="Cart Summary">
       <div
         data-slot="included-products-list"
         className="rounded-[10px] border border-border bg-[#fafcf8] p-2.5"
@@ -64,13 +55,13 @@ export function OrderSummaryCard({
         >
           <img
             data-slot="included-product-thumb"
-            src={product.image.src}
-            alt={product.image.alt}
+            src="/product-summary-image.jpeg"
+            alt="Vitamin Essentials Pack product photo"
             className="h-12 w-12 shrink-0 rounded-lg border border-[#d6e2d0] object-cover"
           />
-          <span className="flex-1 text-foreground">{includedLabel}</span>
+          <span className="flex-1 text-foreground">Vitamin Essentials Pack</span>
           <strong data-slot="included-product-price" className="text-foreground">
-            {product.salePrice}
+            $49.00
           </strong>
         </div>
       </div>
@@ -78,25 +69,22 @@ export function OrderSummaryCard({
         data-slot="included-products-title"
         className="mt-1 text-sm font-bold text-[#1a3c2b]"
       >
-        {copy.includedProductsTitle}
+        Included Products
       </div>
 
       <div className="flex flex-col gap-2">
         <PriceRow
           data-slot="product-line"
-          line={{
-            id: "product",
-            label: product.name,
-            value: product.salePrice,
-          }}
+          line={{ id: "product", label: "Vitamin Essentials Pack", value: "$49.00" }}
           className="my-2 text-[15px]"
           valueClassName="font-bold"
         />
-        <PriceRow data-slot="shipping-line" line={copy.shipping} className="my-2 text-[15px]" />
-        <PriceRow data-slot="tax-line" line={copy.tax} className="my-2 text-[15px]" />
+        <PriceRow data-slot="shipping-line" line={{ id: "shipping", label: "Shipping", value: "$7.95" }} className="my-2 text-[15px]" />
+        <PriceRow data-slot="tax-line" line={{ id: "tax", label: "Tax", value: "$0.00" }} className="my-2 text-[15px]" />
+        {/* WARNING: keep this total in sync with amountMinor in CheckoutPage.tsx */}
         <PriceRow
           data-slot="total-line"
-          line={copy.total}
+          line={{ id: "total", label: "Total", value: "$56.95" }}
           className="mt-3 border-t border-border pt-3 text-[22px]"
           labelClassName="font-bold text-[#122f22]"
           valueClassName="text-[22px] font-bold text-[#122f22]"
@@ -110,14 +98,14 @@ export function OrderSummaryCard({
           className="h-12 w-full rounded-lg border-0 bg-linear-to-b from-pay-cta-from to-pay-cta-to text-base font-extrabold tracking-[0.02em] text-pay-cta-foreground uppercase shadow-pay-cta transition-[transform,box-shadow,background-image] duration-200 hover:from-pay-cta-hover-from hover:to-pay-cta-hover-to hover:shadow-pay-cta-hover motion-safe:animate-pay-cta-pulse cursor-pointer"
         >
           {payLoading && <Spinner data-icon="inline-start" />}
-          {copy.ctaLabel}
+          Pay Now
         </Button>
 
         <p
           data-slot="cta-footnote"
           className="text-xs leading-relaxed text-muted-foreground"
         >
-          {copy.ctaFootnote}
+          By clicking Complete Checkout, you agree to the Terms of Sale.
         </p>
       </div>
     </SectionCard>

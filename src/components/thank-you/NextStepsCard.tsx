@@ -1,8 +1,8 @@
 /**
  * NextStepsCard
  * -----------------------------------------------------------------------------
- * Ordered list of post-purchase steps shown on the thank-you page.
- * Each step has an icon resolved from the step id, a title, and a description.
+ * Ordered list of post-purchase steps shown on the thank-you page. Each step
+ * has an icon resolved from the step id, a title, and a description.
  *
  * Markers:
  *   - root             data-section="next-steps" (via SectionCard)
@@ -17,7 +17,6 @@ import { MailIcon, PackageIcon, TruckIcon } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
-import type { ThankYouStep } from "@/content/config";
 
 const STEP_ICONS: Record<string, LucideIcon> = {
   email: MailIcon,
@@ -25,16 +24,32 @@ const STEP_ICONS: Record<string, LucideIcon> = {
   delivery: TruckIcon,
 };
 
-export interface NextStepsCardProps {
-  title: string;
-  steps: ThankYouStep[];
-}
+const STEPS = [
+  {
+    id: "email",
+    title: "Check your inbox",
+    description:
+      "A confirmation email with your order details has been sent to you.",
+  },
+  {
+    id: "processing",
+    title: "Order processing",
+    description:
+      "Our team is preparing your order and getting it ready to ship.",
+  },
+  {
+    id: "delivery",
+    title: "Delivery",
+    description:
+      "Your package will be on its way soon. Expect delivery within 5–7 business days.",
+  },
+];
 
-export function NextStepsCard({ title, steps }: NextStepsCardProps) {
+export function NextStepsCard() {
   return (
-    <SectionCard section="next-steps" title={title}>
+    <SectionCard section="next-steps" title="What Happens Next">
       <ol className="flex list-none flex-col gap-4 p-0">
-        {steps.map((step) => {
+        {STEPS.map((step) => {
           const Icon = STEP_ICONS[step.id];
           return (
             <li

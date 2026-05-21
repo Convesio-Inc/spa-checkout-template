@@ -1,16 +1,14 @@
 /**
  * CheckoutHeader
  * -----------------------------------------------------------------------------
- * Top information strip shown above the checkout form. All user-visible copy is
- * sourced from `checkoutContent.header.topBar`.
+ * Top information strip shown above the checkout form.
+ *
+ * Markers:
+ *   - root   data-section="checkout-header", data-slot="top-bar"
  * -----------------------------------------------------------------------------
  */
 
-import { checkoutContent } from "@/content/config";
-
 export function CheckoutHeader() {
-  const { badge, messages } = checkoutContent.header.topBar;
-
   return (
     <div
       data-section="checkout-header"
@@ -18,9 +16,9 @@ export function CheckoutHeader() {
       className="mb-4 flex flex-wrap items-center justify-between gap-2.5 rounded-xl border border-[#cde0cf] bg-[#eef7ef] px-3 py-2.5 text-xs text-[#245238] sm:text-sm"
     >
       <span className="inline-flex items-center rounded-full border border-[#c8ddca] bg-white px-2.5 py-1.5 font-semibold text-[#1f4b34]">
-        {badge}
+        Secure Checkout
       </span>
-      {messages.map((message) => (
+      {["All transactions are secure and encrypted", "Need Help? 1-800-390-6035"].map((message) => (
         <span
           key={message}
           className="inline-flex items-center rounded-full border border-[#d5e6d7] bg-[#f7fcf7] px-2.5 py-1.5"

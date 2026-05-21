@@ -5,8 +5,6 @@
  * card is fully controlled: the parent owns state and every `Input` is
  * `required` so the browser blocks `<form>` submission until they are filled.
  *
- * Content source: `checkoutContent.customer`
- *
  * Markers:
  *   - root                  data-section="customer-info"
  *   - email field           data-field="email"
@@ -17,7 +15,6 @@
 
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import type { CustomerFormCopy } from "@/content/config";
 
 export interface CustomerInfoValue {
   email: string;
@@ -26,13 +23,11 @@ export interface CustomerInfoValue {
 }
 
 export interface CustomerInfoCardProps {
-  copy: CustomerFormCopy;
   value: CustomerInfoValue;
   onChange: (next: CustomerInfoValue) => void;
 }
 
 export function CustomerInfo({
-  copy,
   value,
   onChange,
 }: CustomerInfoCardProps) {
@@ -44,12 +39,12 @@ export function CustomerInfo({
   return (
     <FieldGroup>
       <Field data-field="email">
-        <FieldLabel htmlFor="customer-email">{copy.emailLabel}</FieldLabel>
+        <FieldLabel htmlFor="customer-email">Email Address</FieldLabel>
         <Input
           id="customer-email"
           type="email"
           autoComplete="email"
-          placeholder={copy.emailPlaceholder}
+          placeholder="you@example.com"
           required
           value={value.email}
           onChange={set("email")}
@@ -59,14 +54,14 @@ export function CustomerInfo({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-[auto_1fr]">
         <Field data-field="phone-country-code">
           <FieldLabel htmlFor="customer-phone-country-code">
-            {copy.phoneCountryCodeLabel}
+            Country Code
           </FieldLabel>
           <Input
             id="customer-phone-country-code"
             type="text"
             autoComplete="tel-country-code"
             inputMode="tel"
-            placeholder={copy.phoneCountryCodePlaceholder}
+            placeholder="+1"
             required
             className="sm:w-24"
             value={value.phoneCountryCode}
@@ -75,14 +70,14 @@ export function CustomerInfo({
         </Field>
         <Field data-field="phone-number">
           <FieldLabel htmlFor="customer-phone-number">
-            {copy.phoneNumberLabel}
+            Phone Number
           </FieldLabel>
           <Input
             id="customer-phone-number"
             type="tel"
             autoComplete="tel-national"
             inputMode="tel"
-            placeholder={copy.phoneNumberPlaceholder}
+            placeholder="5551234567"
             required
             value={value.phoneNumber}
             onChange={set("phoneNumber")}

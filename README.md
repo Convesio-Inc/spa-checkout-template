@@ -22,7 +22,7 @@ Built with **React 19**, **TypeScript**, **Vite**, **Tailwind CSS v4** and **sha
   - [Environment Variables](#environment-variables)
   - [Testing the Checkout](#testing-the-checkout)
   - [Customization](#customization)
-    - [1. Copy, prices and images — `src/content/config.ts`](#1-copy-prices-and-images--srccontentconfigts)
+    - [1. Copy, prices and images — edit the component directly](#1-copy-prices-and-images--edit-the-component-directly)
     - [2. Brand colors — `src/index.css`](#2-brand-colors--srcindexcss)
     - [3. Layout and behavior — section components](#3-layout-and-behavior--section-components)
   - [Local Development](#local-development)
@@ -43,7 +43,7 @@ Built with **React 19**, **TypeScript**, **Vite**, **Tailwind CSS v4** and **sha
 - **Full checkout flow out of the box** — product page, checkout form (customer + shipping + payment), order summary and a "Thank You" confirmation page.
 - **3D Secure (3DS) support** — the checkout automatically handles 3DS bank challenges and resumes the flow on return, polling for the final payment status.
 - **Secure by design** — your secret keys live only in the Cloudflare Worker; the browser never sees them.
-- **Re-skinnable in minutes** — all copy, prices and images are centralized in a single config file, and your brand color is driven by a handful of CSS variables.
+- **Re-skinnable in minutes** — copy, prices and images live inline in the component that renders them; each component starts with a JSDoc header so you can find and edit the right file instantly. Brand colors are driven by a handful of CSS variables.
 - **Sandbox-first** — ships in test mode so you can iterate safely before going live with a single environment-variable change.
 - **Modern stack** — React 19, TypeScript, Vite, Tailwind v4, shadcn/ui components, React Router 7.
 
@@ -161,27 +161,30 @@ A successful transaction should land the user on the Thank You page. Failed / pe
 
 ## Customization
 
-The template is designed to be re-skinned in three layers of increasing depth. **Start from layer 1 and only go deeper if you need to.**
+The template is designed to be re-skinned in two layers of increasing depth. **Start from layer 1 and only go deeper if you need to.**
 
-### 1. Copy, prices and images — `src/content/config.ts`
+### 1. Copy, prices and images — edit the component directly
 
-This is the **single source of truth** for every user-visible string, price and image on the checkout page (and related pages). Change values here without touching any JSX.
+Every user-visible string, price and image lives **inline in the component or page that renders it**. There is no separate config file — just find the right file, edit the value, save.
 
-Includes:
+Each component starts with a JSDoc header that describes what it renders and lists its `data-*` markers, making it easy to navigate. Quick reference by what you see on the page:
 
-- Brand name and icon
-- Product name, description, images, benefits and prices
-- Header top-bar badge and rotating messages
-- Form panel title and subtitle
-- Form copy (customer / shipping / payment fields, placeholders, labels)
-- Order summary and Pay Now CTA
-- Security badge label
-- Money-back guarantee (days, seal label, headline, description)
-- Countdown timer (days / minutes / seconds, lead text, helper text)
-- Thank You page (heading, subheading, "What Happens Next" steps, receipt copy)
-- Footer copy
+| What you want to change | File to edit |
+|---|---|
+| Top navigation bar (brand name, nav links) | `src/components/site/SiteHeader.tsx` |
+| Checkout info strip (badge + messages) | `src/components/checkout/CheckoutHeader.tsx` |
+| Countdown timer (start time, text) | `src/components/checkout/CheckoutTimer.tsx` |
+| Customer / shipping / payment form labels | `CustomerInfo.tsx` / `ShippingInfo.tsx` / `PaymentInfo.tsx` in `src/components/checkout/` |
+| Country list in shipping form | `COUNTRIES` constant in `src/components/checkout/ShippingInfo.tsx` |
+| Order summary sidebar (product, prices, CTA) | `src/components/checkout/OrderSummaryCard.tsx` |
+| Checkout page title / subtitle | `src/pages/CheckoutPage.tsx` |
+| Product page content | `src/pages/ProductPage.tsx` |
+| Thank-you page content | `src/pages/ThankYouPage.tsx` |
+| Footer | `src/components/site/SiteFooter.tsx` |
 
-Replace the placeholder product and brand images in the `public/` folder and reference them from `config.ts`.
+Replace the placeholder product and brand images by swapping the files in `public/` and updating the `src` paths in the relevant components above.
+
+> **⚠ Keep payment amount in sync:** `amountMinor` in `src/pages/CheckoutPage.tsx` is the charge sent to ConvesioPay (in cents). It must match the displayed "Total" in `src/components/checkout/OrderSummaryCard.tsx`. Both files have a warning comment as a reminder.
 
 ### 2. Brand colors — `src/index.css`
 
@@ -215,14 +218,14 @@ Each section of the checkout lives in its own component under `src/components/ch
 - `ShippingInfo.tsx`
 - `PaymentInfo.tsx`
 - `OrderSummaryCard.tsx`
-- `CheckoutTimer.tsx` — urgency countdown timer driven by `config.timer`
+- `CheckoutTimer.tsx` — urgency countdown timer
 - `PaymentStatusDialog.tsx`
 
 Shared layout atoms used by the above live in `src/components/checkout/primitives/` (`PriceRow.tsx`, `SectionCard.tsx`).
 
 The global site header and footer are in `src/components/site/` (`SiteHeader.tsx`, `SiteFooter.tsx`) and are rendered by `App.tsx` as layout wrappers around every page.
 
-Compose or reorder the checkout components in `src/pages/CheckoutPage.tsx`. Each component starts with a JSDoc header listing its props and the `config.ts` path that feeds it.
+Compose or reorder the checkout components in `src/pages/CheckoutPage.tsx`. Each component starts with a JSDoc header listing its props and `data-*` markers.
 
 ---
 
@@ -288,8 +291,6 @@ npm run preview    # Builds + serves through Wrangler
 │   │   ├── site/                Global layout (SiteHeader, SiteFooter)
 │   │   ├── thank-you/           Thank-you-page components
 │   │   └── ui/                  shadcn/ui primitives
-│   ├── content/
-│   │   └── config.ts          ★ Central config: copy, prices, images
 │   ├── hooks/                   Checkout / payment / SDK / thank-you hooks
 │   ├── interfaces/              Global TypeScript ambient declarations
 │   ├── lib/                     Utilities + ConvesioPay SDK singleton
@@ -346,9 +347,6 @@ Verify `CPAY_SECRET`, `CPAY_API_KEY` and `CPAY_INTEGRATION` are set as Worker se
 
 **Payment succeeds in sandbox but fails in live.**
 Live integrations require their own distinct credentials — sandbox keys won't work against the live API. Double-check you've created a separate integration in the production console.
-
-**I changed `config.ts` but the page didn't update.**
-Stop and restart the dev server. Vite usually hot-reloads, but changes to types can occasionally require a clean restart.
 
 ---
 

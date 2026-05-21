@@ -38,7 +38,6 @@ React 19 + TypeScript SPA (Vite) deployed as a **Cloudflare Worker** (`@cloudfla
 
 | File | Role |
 |---|---|
-| `src/content/config.ts` | **Start here for any copy/price/image change.** Typed config object; each section has its own interface. |
 | `src/index.css` | `/* === BRAND THEME === */` block — four `--brand*` tokens (fill, foreground, accent, accent-foreground) plus five `--pay-cta-*` tokens for the Pay Now CTA gradient button. |
 | `src/App.tsx` | React Router 7 routes: `/` → `CheckoutPage`, `/product` → `ProductPage`, `/thank-you` → `ThankYouPage`. |
 | `src/pages/CheckoutPage.tsx` | Owns all form state; wires the two hooks together; drives `PaymentStatusDialog`. |
@@ -70,11 +69,20 @@ Declared in `wrangler.jsonc` (as `secrets.required`, so Wrangler fails the deplo
 
 ## Customization layers
 
-Three layers in increasing depth — only go deeper than you need:
+Two layers in increasing depth — only go deeper than you need:
 
-1. **Copy / prices / images** → `src/content/config.ts` (no JSX changes needed)
-2. **Brand colors** → `/* === BRAND THEME === */` block in `src/index.css`
-3. **Layout or behaviour** → section components under `src/components/checkout/`, `src/components/product/`, `src/components/thank-you/`; compose or reorder them in the matching page under `src/pages/`.
+1. **Copy / prices / images / brand** → find the component under `src/components/` or the page under `src/pages/` and edit the strings directly in the JSX. Each component starts with a JSDoc header describing what it renders and listing its `data-*` markers, so it is easy to locate the right file. Key locations by what you see on the page:
+   - Top navigation bar → `src/components/site/SiteHeader.tsx`
+   - Checkout info strip (badge + messages) → `src/components/checkout/CheckoutHeader.tsx`
+   - Countdown timer (initial time + text) → `src/components/checkout/CheckoutTimer.tsx`
+   - Customer / shipping / payment form labels → `src/components/checkout/CustomerInfo.tsx`, `ShippingInfo.tsx`, `PaymentInfo.tsx`
+   - Country list in shipping form → `COUNTRIES` constant in `src/components/checkout/ShippingInfo.tsx`
+   - Order summary sidebar (product name, prices, CTA) → `src/components/checkout/OrderSummaryCard.tsx`
+   - Product page content → `src/pages/ProductPage.tsx`
+   - Thank-you page content → `src/pages/ThankYouPage.tsx`
+   - Footer → `src/components/site/SiteFooter.tsx`
+   - **⚠ Payment amount**: `amountMinor` in `src/pages/CheckoutPage.tsx` is passed to ConvesioPay in cents — keep it in sync with the displayed "Total" in `src/components/checkout/OrderSummaryCard.tsx`.
+2. **Brand colors** → `/* === BRAND THEME === */` block in `src/index.css`.
 
 Section components live in four families:
 
@@ -83,7 +91,7 @@ Section components live in four families:
 - `src/components/product/` — `ProductHero`, `ProductCopySection`.
 - `src/components/thank-you/` — `ThankYouHeader`, `OrderConfirmationCard`, `NextStepsCard`.
 
-Each section component starts with a JSDoc header listing its props and the `config.ts` path that feeds it.
+Each section component starts with a JSDoc header listing its props and `data-*` markers.
 
 ## Semantic markers (preserve when editing)
 
