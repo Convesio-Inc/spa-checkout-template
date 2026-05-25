@@ -1,10 +1,10 @@
 /**
  * CheckoutTimer
  * -----------------------------------------------------------------------------
- * Template-inspired countdown banner rendered inside the checkout form stack.
- * Displays lead text, a live MM:SS timer badge, and helper text. Stops at zero.
+ * Countdown banner rendered inside the checkout form stack. Displays lead text,
+ * a live MM:SS timer badge, and helper text. Stops at zero.
  *
- * Content source: `checkoutContent.timer`
+ * To change the starting time, edit INITIAL_SECONDS below.
  *
  * Markers:
  *   - root              data-section="checkout-timer"
@@ -14,21 +14,14 @@
 
 import { useEffect, useState } from "react";
 
-import type { TimerConfig } from "@/content/config";
-
-export interface CheckoutTimerProps {
-  timer: TimerConfig;
-}
+const INITIAL_SECONDS = 14 * 60 + 59; // 14:59
 
 function pad(n: number): string {
   return String(n).padStart(2, "0");
 }
 
-export function CheckoutTimer({ timer }: CheckoutTimerProps) {
-  const initialSeconds =
-    timer.days * 86400 + timer.minutes * 60 + timer.seconds;
-
-  const [remaining, setRemaining] = useState(initialSeconds);
+export function CheckoutTimer() {
+  const [remaining, setRemaining] = useState(INITIAL_SECONDS);
 
   useEffect(() => {
     if (remaining <= 0) return;
@@ -49,7 +42,7 @@ export function CheckoutTimer({ timer }: CheckoutTimerProps) {
       className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-[#d9e4da] bg-[#f7fbf7] px-3 py-2.5 text-xs text-[#3f5c49] sm:text-sm"
     >
       <strong className="text-xs font-semibold tracking-[0.01em] sm:text-sm">
-        {timer.leadText}
+        Offer reserved for:
       </strong>
       <span
         data-slot="countdown-timer"
@@ -57,7 +50,7 @@ export function CheckoutTimer({ timer }: CheckoutTimerProps) {
       >
         {mmss}
       </span>
-      <span>{timer.helperText}</span>
+      <span>Complete checkout now to keep your bonus.</span>
     </div>
   );
 }

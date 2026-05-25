@@ -7,8 +7,6 @@
  * and client key are fetched once from the `/config` worker endpoint and
  * cached at module scope.
  *
- * Content source: `checkoutContent.payment`
- *
  * Markers:
  *   - root                        data-section="payment-info"
  *   - mount container             data-slot="cpay-mount"
@@ -19,11 +17,9 @@
 
 import { useEffect, useRef } from "react";
 
-import type { PaymentFormCopy } from "@/content/config";
 import { useConvesioPayCheckout } from "@/hooks/useConvesioPayCheckout";
 
 export interface PaymentInfoProps {
-  copy: PaymentFormCopy;
   customerEmail?: string;
   /** Fires whenever the ConvesioPay component reports a validity change. */
   onValidityChange?: (isValid: boolean) => void;
@@ -33,7 +29,6 @@ export interface PaymentInfoProps {
 }
 
 export function PaymentInfo({
-  copy,
   customerEmail,
   onValidityChange,
   onComponentReady,
@@ -70,7 +65,7 @@ export function PaymentInfo({
           className="text-sm text-muted-foreground"
           aria-live="polite"
         >
-          {copy.loadingMessage}
+          Loading secure payment form...
         </p>
       )}
 
@@ -80,7 +75,7 @@ export function PaymentInfo({
           role="alert"
           className="text-sm text-destructive"
         >
-          {error?.message ?? copy.errorFallbackMessage}
+          {error?.message ?? "Could not load the payment form."}
         </p>
       )}
     </div>

@@ -27,15 +27,11 @@ import { CheckCircle2Icon } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import type { BrandConfig } from "@/content/config";
 
 export type ThankYouHeaderStatus = "verifying" | "pending" | "succeeded";
 
 export interface ThankYouHeaderProps {
-  brand: BrandConfig;
-  heading: string;
-  subheading: string;
-  /** Defaults to "succeeded" for backwards compatibility. */
+  /** Defaults to "succeeded". */
   status?: ThankYouHeaderStatus;
   /** Optional override for the heading when status !== "succeeded". */
   pendingHeading?: string;
@@ -50,9 +46,6 @@ const DEFAULT_VERIFYING_SUBHEADING =
   "Just a moment while we confirm your order.";
 
 export function ThankYouHeader({
-  brand,
-  heading,
-  subheading,
   status = "succeeded",
   pendingHeading,
   pendingSubheading,
@@ -60,11 +53,11 @@ export function ThankYouHeader({
   const isSucceeded = status === "succeeded";
 
   const resolvedHeading = isSucceeded
-    ? heading
+    ? "Order Confirmed!"
     : (pendingHeading ?? DEFAULT_PENDING_HEADING);
 
   const resolvedSubheading = isSucceeded
-    ? subheading
+    ? "Your order has been received and is being processed."
     : (pendingSubheading ??
       (status === "verifying"
         ? DEFAULT_VERIFYING_SUBHEADING
@@ -76,15 +69,15 @@ export function ThankYouHeader({
         <CardContent className="flex items-center justify-between">
           <img
             data-slot="brand-icon"
-            src={brand.icon.src}
-            alt={brand.icon.alt}
+            src="/store-logo.jpeg"
+            alt="BioVerve logo"
             className="h-9 w-9 shrink-0 rounded-lg border border-brand/40 object-cover"
           />
           <span
             data-slot="brand-name"
             className="text-xs font-semibold uppercase tracking-[0.14em] text-brand"
           >
-            {brand.name}
+            BioVerve
           </span>
         </CardContent>
       </Card>

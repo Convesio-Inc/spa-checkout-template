@@ -12,7 +12,12 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import type { PriceLine } from "@/content/config";
+
+export interface PriceLine {
+  id: string;
+  label: string;
+  value: string;
+}
 
 export interface PriceRowProps extends React.ComponentProps<"div"> {
   line: PriceLine;

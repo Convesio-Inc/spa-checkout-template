@@ -16,7 +16,6 @@
  * Native HTML5 `required` attributes on every input stop the form from
  * submitting until the browser's built-in validation passes.
  *
- * All copy, images, and pricing come from `src/content/config.ts`.
  * All colors come from the `BRAND THEME` block in `src/index.css`.
  *
  * Layout (top to bottom, all inside a single `max-w-5xl` content column):
@@ -27,6 +26,9 @@
  *   - root            data-page="checkout"
  *   - form column     data-region="form-stack"
  *   - summary column  data-region="summary"
+ *
+ * WARNING: amountMinor below is passed to ConvesioPay and must equal the
+ * displayed "Total" value in OrderSummaryCard.tsx (in cents, e.g. 5695 = $56.95).
  * -----------------------------------------------------------------------------
  */
 
@@ -45,7 +47,6 @@ import {
   ShippingInfo,
   type ShippingInfoValue,
 } from "@/components/checkout/ShippingInfo";
-import { checkoutContent } from "@/content/config";
 import { useCheckoutPayment } from "@/hooks/useCheckoutPayment";
 import { SectionCard } from "@/components/checkout/primitives/SectionCard";
 
@@ -80,16 +81,6 @@ export function CheckoutPage() {
 
   const { status, error, result, pay, reset } = useCheckoutPayment();
 
-  const {
-    product,
-    formPanel,
-    customer: customerCopy,
-    shipping: shippingCopy,
-    payment,
-    summary,
-    timer,
-  } = checkoutContent;
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!componentRef.current) return;
@@ -107,8 +98,9 @@ export function CheckoutPage() {
     await pay(componentRef.current, {
       email: customer.email,
       name: shipping.fullName,
-      amount: summary.amountMinor,
-      currency: summary.currency,
+      // WARNING: keep in sync with the displayed "Total" in OrderSummaryCard.tsx
+      amount: 5695, // $56.95 in cents
+      currency: "USD",
       phone: {
         number: customer.phoneNumber,
         countryCode: customer.phoneCountryCode,
@@ -117,9 +109,9 @@ export function CheckoutPage() {
       shippingAddress: address,
       lineItems: [
         {
-          description: product.name,
+          description: "Vitamin Essentials Pack",
           quantity: 1,
-          amountIncludingTax: summary.amountMinor,
+          amountIncludingTax: 5695,
         },
       ]
     });
@@ -143,21 +135,20 @@ export function CheckoutPage() {
               <SectionCard section="checkout-panel">
                 <div data-slot="panel-intro" className="mb-1">
                   <h1 className="text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.025em] text-foreground">
-                    {formPanel.title}
+                    Secure Checkout
                   </h1>
                   <p className="mt-3 text-[15px] text-muted-foreground">
-                    {formPanel.subtitle}
+                    Complete your details below to place your order.
                   </p>
                 </div>
 
-                <CheckoutTimer timer={timer} />
+                <CheckoutTimer />
 
                 <section data-section="customer-info">
                   <h2 className="mb-3 text-lg font-semibold text-[#163427]">
-                    {customerCopy.title}
+                    Customer Information
                   </h2>
                   <CustomerInfo
-                    copy={customerCopy}
                     value={customer}
                     onChange={setCustomer}
                   />
@@ -168,10 +159,9 @@ export function CheckoutPage() {
                   className="mt-2 border-t border-border pt-5"
                 >
                   <h2 className="mb-3 text-lg font-semibold text-[#163427]">
-                    {payment.title}
+                    Payment Information
                   </h2>
                   <PaymentInfo
-                    copy={payment}
                     customerEmail={customer.email || undefined}
                     onValidityChange={setIsPaymentValid}
                     onComponentReady={handleComponentReady}
@@ -183,10 +173,9 @@ export function CheckoutPage() {
                   className="mt-2 border-t border-border pt-5"
                 >
                   <h2 className="mb-3 text-lg font-semibold text-[#163427]">
-                    {shippingCopy.title}
+                    Shipping Information
                   </h2>
                   <ShippingInfo
-                    copy={shippingCopy}
                     value={shipping}
                     onChange={setShipping}
                   />
@@ -198,8 +187,6 @@ export function CheckoutPage() {
             {/* #region SECTION: Cart Summary */}
             <div data-region="summary" className="lg:sticky lg:top-6">
               <OrderSummaryCard
-                copy={summary}
-                product={product}
                 payDisabled={!isPaymentValid}
                 payLoading={isProcessing}
               />
