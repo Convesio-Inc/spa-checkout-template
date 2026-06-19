@@ -5,7 +5,6 @@
  * `wrangler types`), while still giving us typed `env.CPAY_*` access.
  */
 interface Env {
-  CPAY_CLIENT_KEY: string;
   CPAY_API_KEY: string;
   CPAY_SECRET: string;
   CPAY_INTEGRATION: string;

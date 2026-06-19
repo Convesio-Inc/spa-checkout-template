@@ -35,7 +35,7 @@
  *                         a pending payment every few seconds.
  *
  * Secrets are sourced from the Worker environment:
- *   CPAY_API_KEY, CPAY_CLIENT_KEY, CPAY_SECRET, CPAY_INTEGRATION
+ *   CPAY_API_KEY, CPAY_SECRET, CPAY_INTEGRATION
  *   CPAY_ENVIRONMENT (plain var; defaults to "test")
  *
  * `CPAY_ENVIRONMENT` also selects the upstream host: sandbox secrets must hit
@@ -163,26 +163,10 @@ function requireSecret(env: Env): Response | string {
   return secret;
 }
 
-function requireClientKey(env: Env): Response | string {
-  const clientKey = env.CPAY_CLIENT_KEY?.trim();
-  if (!clientKey) {
-    return json(
-      {
-        error: true,
-        message:
-          'Worker is missing CPAY_CLIENT_KEY. Set it via `wrangler secret put` or your `.env` / `.dev.vars`.',
-      },
-      { status: 500 },
-    );
-  }
-  return clientKey;
-}
-
 async function handleConfig(env: Env): Promise<Response> {
   return json(
     {
       apiKey: env.CPAY_API_KEY,
-      clientKey: env.CPAY_CLIENT_KEY,
       environment: env.CPAY_ENVIRONMENT ?? 'test',
     },
     { headers: { 'Cache-Control': 'public, max-age=300, s-maxage=300' } },
@@ -212,9 +196,6 @@ async function handlePayments(
   const secret = requireSecret(env);
   if (secret instanceof Response) return secret;
 
-  const clientKey = requireClientKey(env);
-  if (clientKey instanceof Response) return clientKey;
-
   const environment = resolveEnvironment(env);
   const origin = new URL(request.url).origin;
   const orderNumber = body.orderNumber ?? crypto.randomUUID();
@@ -241,7 +222,7 @@ async function handlePayments(
         order_number: orderNumber,
         status: 'AwaitingAction',
       },
-      clientKey,
+      env.CPAY_SECRET
     );
   } catch (err) {
     return json(
@@ -346,7 +327,7 @@ async function handlePayments(
         order_number: parsed.orderNumber ?? payload.orderNumber,
         status: upstreamStatus,
       },
-      clientKey,
+      env.CPAY_SECRET
     );
   } catch (err) {
     return json(
@@ -385,11 +366,8 @@ async function handleVerifyToken(
     );
   }
 
-  const clientKey = requireClientKey(env);
-  if (clientKey instanceof Response) return clientKey;
-
   try {
-    const payload = await verifyCheckoutToken(token, clientKey);
+    const payload = await verifyCheckoutToken(token, env.CPAY_SECRET);
     return json({
       payment_id: payload.payment_id,
       customer_id: payload.customer_id,
@@ -445,9 +423,6 @@ async function handleIssueToken(
 
   const secret = requireSecret(env);
   if (secret instanceof Response) return secret;
-
-  const clientKey = requireClientKey(env);
-  if (clientKey instanceof Response) return clientKey;
 
   const environment = resolveEnvironment(env);
 
@@ -513,7 +488,7 @@ async function handleIssueToken(
         order_number: parsed.orderNumber ?? '',
         status: statusForToken,
       },
-      clientKey,
+      env.CPAY_SECRET
     );
   } catch (err) {
     return json(

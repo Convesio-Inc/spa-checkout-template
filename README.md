@@ -113,15 +113,13 @@ From your Convesio console, create a new Static Site pointing at your forked rep
 1. Log in to the [ConvesioPay Sandbox console](https://dev.convesiopay.com/) (or [ConvesioPay's Live Console](https://convesiopay.com/) for live environments).
 2. Navigate to **Advanced Settings → [Connected Integrations](https://dev.convesiopay.com/advanced-settings/connected-integrations)** and click **CREATE NEW INTEGRATION**. Give it a name of your choice — you'll need it later as `CPAY_INTEGRATION`.
 3. Copy the **integration secret key** that gets generated. This will be your `CPAY_SECRET`.
-4. Under **Client Keys**, paste your Static Site URL and click **Generate Client Key**. Copy it — this will be your `CPAY_CLIENT_KEY`.
-5. Go to **Advanced Settings → [Get Your API Key](https://dev.convesiopay.com/advanced-settings/api-key)** and copy your API key. This will be your `CPAY_API_KEY`.
+4. Go to **Advanced Settings → [Get Your API Key](https://dev.convesiopay.com/advanced-settings/api-key)** and copy your API key. This will be your `CPAY_API_KEY`.
 
 ### 4. Configure environment variables
 
 In your Convesio Static Site settings, add the following variables (see [Environment Variables](#environment-variables) below for details):
 
 - `CPAY_INTEGRATION`
-- `CPAY_CLIENT_KEY`
 - `CPAY_SECRET`
 - `CPAY_API_KEY`
 
@@ -133,12 +131,11 @@ Open your Static Site URL and run a test payment using the card numbers from the
 
 ## Environment Variables
 
-All five credentials are required. They are injected at runtime into the Cloudflare Worker — the browser never has direct access to them.
+All four credentials are required. They are injected at runtime into the Cloudflare Worker — the browser never has direct access to them.
 
 | Variable | Type | Description |
 |---|---|---|
 | `CPAY_INTEGRATION` | secret | Name of the integration you created in the ConvesioPay console. |
-| `CPAY_CLIENT_KEY` | secret | Public client key bound to your Static Site URL. Sent to the browser to initialize the SDK. |
 | `CPAY_SECRET` | secret | Server-side integration secret. **Never expose this client-side.** |
 | `CPAY_API_KEY` | secret | ConvesioPay API key used for server-to-server calls. |
 | `CPAY_ENVIRONMENT` | var | `"test"` (default) or `"live"`. Configured in `wrangler.jsonc`. |
@@ -239,10 +236,9 @@ npm install
 
 ### 2. Configure local secrets
 
-The SPA dev server alone (`npm run dev`) doesn't need credentials, but the Worker does. Create a `.dev.vars` file at the project root (copy from `.env.example` if present) with the same four credentials described in [Environment Variables](#environment-variables):
+The SPA dev server alone (`npm run dev`) doesn't need credentials, but the Worker does. Create a `.dev.vars` file at the project root (copy from `.env.example` if present) with the same three credentials described in [Environment Variables](#environment-variables):
 
 ```bash
-CPAY_CLIENT_KEY=...
 CPAY_API_KEY=...
 CPAY_SECRET=...
 CPAY_INTEGRATION=...
@@ -332,15 +328,11 @@ When you're confident the checkout works end-to-end in sandbox:
 - **Always start in sandbox.** Test thoroughly with the [official test cards](https://docs.convesiopay.com/convesiopay-payment-checkout-integration-api/payments/test-cards) before flipping `CPAY_ENVIRONMENT` to `"live"`.
 - **Never hardcode credentials.** All keys must live in environment variables, never in frontend code or committed files.
 - **Never return the `env` object** from the Worker's `fetch` function on any API endpoint — doing so would expose every secret.
-- **Use client keys scoped to your domain.** The `CPAY_CLIENT_KEY` is bound to the Static Site URL you registered in the ConvesioPay console.
 - **Keep dependencies up to date** with `npm audit` and regular upgrades.
 
 ---
 
 ## Troubleshooting
-
-**The checkout iframe doesn't load.**
-Check the browser console. Most commonly the `CPAY_CLIENT_KEY` is missing, incorrect, or not whitelisted for your Static Site URL.
 
 **I get a 401 / 403 from `/payments`.**
 Verify `CPAY_SECRET`, `CPAY_API_KEY` and `CPAY_INTEGRATION` are set as Worker secrets (not just plain vars) and match the integration you're pointing at.
